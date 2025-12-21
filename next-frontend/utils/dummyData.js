@@ -1,0 +1,38 @@
+export const properties = [
+  {
+    id: 1,
+    title: "Spacious Office for Rent in Gulberg",
+    city: "Lahore",
+    price: "120,000",
+    area: "900 sq. ft.",
+    image: "/images/property1.jpg",
+    location: "Gulberg III, Lahore",
+  },
+  {
+    id: 2,
+    title: "Modern Office Space in DHA",
+    city: "Lahore",
+    price: "250,000",
+    area: "1500 sq. ft.",
+    image: "/images/property2.jpg",
+    location: "DHA Phase 5, Lahore",
+  },
+  {
+    id: 3,
+    title: "Commercial Office in Blue Area",
+    city: "Islamabad",
+    price: "300,000",
+    area: "2000 sq. ft.",
+    image: "/images/property3.jpg",
+    location: "Blue Area, Islamabad",
+  },
+  {
+    id: 4,
+    title: "Office Space for Rent in Clifton",
+    city: "Karachi",
+    price: "180,000",
+    area: "1200 sq. ft.",
+    image: "/images/property4.jpg",
+    location: "Clifton Block 5, Karachi",
+  },
+];
