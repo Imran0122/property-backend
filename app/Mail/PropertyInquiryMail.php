@@ -1,4 +1,5 @@
 <?php
+namespace App\Mail;
 class PropertyInquiryMail extends Mailable
 {
     public function __construct(public $data) {}
