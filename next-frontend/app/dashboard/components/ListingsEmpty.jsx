@@ -5,9 +5,9 @@ const ListingsEmpty = () => {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Your Listings</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Vos annonces</h2>
         <a href="#" className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1">
-          View All Listings
+          Voir toutes les annonces
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -27,14 +27,14 @@ const ListingsEmpty = () => {
           </svg>
         </div>
 
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Active Listings</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune annonce active</h3>
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          Your active listings will appear here.
+          Vos annonces actives apparaîtront ici
         </p>
 
         <button className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm">
           <Plus size={20} />
-          Post Listing
+          Publier une annonce
         </button>
       </div>
     </div>

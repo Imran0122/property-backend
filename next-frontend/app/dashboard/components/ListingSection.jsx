@@ -13,9 +13,9 @@ const ListingsSection = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-gray-800">Listings</h2>
+        <h2 className="font-semibold text-gray-800">Annonces</h2>
         <a href="#" className="text-green-600 text-sm font-medium hover:underline">
-          View all Zameen Listings
+          Voir toutes les annonces Hectare
         </a>
       </div>
       <div className="flex flex-wrap gap-4">

@@ -14,7 +14,7 @@ const QuotaCard = () => {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-5">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Quota and Credits</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">Quota et Crédits</h2>
       
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto">
@@ -39,11 +39,11 @@ const QuotaCard = () => {
       {/* Content */}
       <div className="grid grid-cols-3 gap-6">
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-1">Available Quota</p>
+          <p className="text-sm text-gray-600 mb-1">Quota disponible</p>
           <p className="text-3xl font-bold text-gray-900">0</p>
         </div>
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-1">Used</p>
+          <p className="text-sm text-gray-600 mb-1">Utilisé</p>
           <p className="text-3xl font-bold text-gray-900">0</p>
         </div>
         <div className="text-center">

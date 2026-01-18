@@ -25,7 +25,7 @@ export default function PropertyList({ initialQuery = {} }) {
     load(initialQuery);
   }, [JSON.stringify(initialQuery)]);
 
-  if (loading) return <div className="text-center p-6">Loading properties...</div>;
+  if (loading) return <div className="text-center p-6">Chargement des propriétés...</div>;
 
   return (
     <div>

@@ -32,9 +32,12 @@ export default function Filters({ onSearch }) {
         className="border border-gray-300 p-2 rounded-md focus:ring-1 focus:ring-green-500"
       >
         <option value="">All Cities</option>
-        <option value="Lahore">Lahore</option>
-        <option value="Karachi">Karachi</option>
-        <option value="Islamabad">Islamabad</option>
+        <option value="Casablanca">Casablanca</option>
+        <option value="Marrakech">Marrakech</option>
+        <option value="Rabat">Rabat</option>
+        <option value="Fes">Fes</option>
+        <option value="Tangier">Tangier</option>
+        <option value="Agadir">Agadir</option>
       </select>
 
       {/* Price Range */}
@@ -62,11 +65,11 @@ export default function Filters({ onSearch }) {
         onChange={handleChange}
         className="border border-gray-300 p-2 rounded-md focus:ring-1 focus:ring-green-500"
       >
-        <option value="">Any Bedrooms</option>
-        <option value="1">1 Bed</option>
-        <option value="2">2 Beds</option>
-        <option value="3">3 Beds</option>
-        <option value="4">4 Beds</option>
+        <option value="">Toutes les chambres </option>
+        <option value="1">1 Lit</option>
+        <option value="2">2 Lit</option>
+        <option value="3">3 Lit</option>
+        <option value="4">4 Lit</option>
       </select>
 
       {/* Keyword */}
@@ -84,7 +87,7 @@ export default function Filters({ onSearch }) {
         type="submit"
         className="bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition md:col-span-6"
       >
-        Search
+        Rechercher 
       </button>
     </form>
   );

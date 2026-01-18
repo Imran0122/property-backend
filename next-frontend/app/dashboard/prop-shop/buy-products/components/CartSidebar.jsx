@@ -8,12 +8,13 @@ export default function CartSidebar({ cart = [], total = 0, onRemove, onChangeQt
       {cart.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-56 w-full">
           <div className="text-6xl">🛒</div>
-          <h4 className="mt-3 text-lg font-semibold">No Items</h4>
-          <p className="text-sm text-gray-500">Added in cart</p>
+          <h4 className="mt-3 text-lg font-semibold">Aucun article</h4>
+<p className="text-sm text-gray-500">Ajouté au panier</p>
+
         </div>
       ) : (
         <div className="w-full">
-          <h4 className="text-lg font-semibold mb-4">Order Summary</h4>
+          <h4 className="text-lg font-semibold mb-4">Résumé de la commande</h4>
 
           <div className="space-y-3 max-h-72 overflow-auto">
             {cart.map((item) => (
@@ -38,12 +39,12 @@ export default function CartSidebar({ cart = [], total = 0, onRemove, onChangeQt
 
           <div className="mt-4 border-t pt-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-sm text-gray-500">Subtotal</div>
+              <div className="text-sm text-gray-500">Sous-total</div>
               <div className="font-semibold">Rs {total.toLocaleString()}</div>
             </div>
 
-            <button className="w-full bg-green-600 text-white py-3 rounded-md mb-2">Proceed To Payment</button>
-            <button onClick={onClear} className="w-full border py-2 rounded-md text-gray-700">Clear Cart</button>
+            <button className="w-full bg-green-600 text-white py-3 rounded-md mb-2">Passer au paiement</button>
+            <button onClick={onClear} className="w-full border py-2 rounded-md text-gray-700">Vider le panier</button>
           </div>
         </div>
       )}

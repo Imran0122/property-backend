@@ -22,12 +22,12 @@ export default function PropertyCard({ property }) {
           </div>
 
           <div className="text-right">
-            <div className="text-xs text-gray-500">Views -</div>
+            <div className="text-xs text-gray-500">Vues -</div>
             <div className="mt-3">
-              <span className="px-3 py-1 rounded-full bg-gray-100 text-sm text-gray-700">Not Published</span>
+              <span className="px-3 py-1 rounded-full bg-gray-100 text-sm text-gray-700">Non publié</span>
             </div>
             <div className="mt-3">
-              <button className="px-3 py-1 bg-white border rounded-md text-sm">Publish Now</button>
+              <button className="px-3 py-1 bg-white border rounded-md text-sm">Publier maintenant</button>
             </div>
           </div>
         </div>

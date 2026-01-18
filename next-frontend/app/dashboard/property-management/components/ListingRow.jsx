@@ -12,7 +12,7 @@ export default function ListingRow({ item }) {
           </div>
           <div>
             <div className="text-green-700 font-semibold">Rs {Number(item.price).toLocaleString()}</div>
-            <div className="text-sm font-bold text-gray-800">{item.title ?? "Property title"}</div>
+            <div className="text-sm font-bold text-gray-800">{item.title ?? "Titre de la propriété"}</div>
             <div className="text-xs text-gray-500 mt-1">{item.city} • {item.area_text}</div>
             <div className="text-xs text-gray-400 mt-1">ID {item.id}</div>
           </div>
@@ -20,13 +20,14 @@ export default function ListingRow({ item }) {
       </td>
 
       <td className="px-4 py-5 align-top">
-        <div className="text-xs text-gray-500">Platform</div>
+        <div className="text-xs text-gray-500">Plateforme</div>
         <div className="text-sm">—</div>
       </td>
 
       <td className="px-4 py-5 align-top">
-        <div className="text-xs text-gray-500">Views -</div>
-        <div className="text-xs text-gray-500">Clicks -</div>
+        <div className="text-xs text-gray-500">Vues -</div>
+<div className="text-xs text-gray-500">Clics -</div>
+
       </td>
 
       <td className="px-4 py-5 align-top">
@@ -34,12 +35,12 @@ export default function ListingRow({ item }) {
       </td>
 
       <td className="px-4 py-5 align-top">
-        <span className="px-3 py-1 rounded-full bg-gray-100 text-sm">Not Published</span>
+        <span className="px-3 py-1 rounded-full bg-gray-100 text-sm">Non publié</span>
       </td>
 
       <td className="px-4 py-5 align-top">
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1 border rounded-md">Publish Now</button>
+          <button className="px-3 py-1 border rounded-md">Publier maintenant</button>
         </div>
       </td>
     </tr>

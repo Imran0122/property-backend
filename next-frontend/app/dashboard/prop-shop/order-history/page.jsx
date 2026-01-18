@@ -7,7 +7,7 @@ const OrderHistory = () => {
     <div className="p-6 bg-gray-50 min-h-screen flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold text-gray-800">My Orders</h1>
+        <h1 className="text-lg font-semibold text-gray-800">Mes commandes</h1>
       </div>
 
       {/* Main Content */}
@@ -17,14 +17,14 @@ const OrderHistory = () => {
             <FaSearch className="text-green-600 text-3xl opacity-70" />
           </div>
           <h2 className="text-gray-700 font-semibold text-base">
-            No Record Found
+            Aucun enregistrement trouvé
           </h2>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="text-center text-gray-400 text-sm mt-8">
-        © 2025 – Powered by Zameen.com
+        © 2025 – Propulsé par Hectare.ma
       </footer>
     </div>
   );

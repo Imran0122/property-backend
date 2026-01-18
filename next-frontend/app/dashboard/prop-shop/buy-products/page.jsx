@@ -4,62 +4,62 @@ import { FaCamera, FaVideo, FaFire, FaBolt, FaRegImage } from "react-icons/fa";
 
 const products = [
   {
-    category: "Listings",
+    category: "Annonces",
     items: [
       {
         icon: <FaRegImage className="text-green-600 text-xl" />,
-        title: "Listing",
-        description: "Get an ad slot for 30 days to post your listing",
-        price: "Rs 3,000",
+        title: "Annonce",
+        description: "Obtenez un emplacement publicitaire pendant 30 jours pour publier votre annonce",
+        price: "MAD 3,000",
       },
       {
         icon: <FaFire className="text-orange-500 text-xl" />,
-        title: "Hot Listing",
-        description:
-          "Get an ad slot for 30 days and place your ad above normal listings",
-        price: "Rs 7,800",
+        title: "Annonce Hot",
+        description: "Obtenez un emplacement publicitaire pendant 30 jours et placez votre annonce au-dessus des annonces normales",
+        price: "MAD 7,800",
       },
       {
         icon: <FaBolt className="text-red-500 text-xl" />,
-        title: "Super Hot Listing",
-        description:
-          "Get an ad slot for 30 days and place your ad at the top of search results",
-        price: "Rs 21,000",
+        title: "Annonce Super Hot",
+        description: "Obtenez un emplacement publicitaire pendant 30 jours et placez votre annonce en tête des résultats de recherche",
+        price: "MAD 21,000",
       },
+
     ],
   },
   {
-    category: "Credits (Only applicable on already posted listings)",
+    category: "Crédits (Applicable uniquement aux annonces déjà publiées)",
     items: [
       {
         icon: <FaRegImage className="text-blue-500 text-xl" />,
-        title: "Refresh Credits",
+        title: "Crédits de rafraîchissement",
         description:
-          "Refresh the time of your posted listings and bring them to the top again",
-        price: "Rs 240",
+          "Actualisez l’heure de vos annonces publiées et remontez-les en haut à nouveau",
+        price: "MAD 240",
       },
       {
         icon: <FaRegImage className="text-green-500 text-xl" />,
-        title: "Story Ad Credits",
-        description: "Get more exposure by posting your listing in the story",
-        price: "Rs 1,000",
+        title: "Crédits pour annonces en story",
+        description: "Obtenez plus de visibilité en publiant votre annonce dans la story",
+        price: "MAD 1,000",
       },
       {
         icon: <FaCamera className="text-sky-500 text-xl" />,
-        title: "Verified Photography Credits",
+        title: "Crédits pour photographie vérifiée",
         description:
-          "Upgrade your property's visual appeal with our premium professional photoshoot service. Service only available in Karachi, Lahore & Islamabad.",
-        price: "Rs 3,600",
-        tag: "Recommended",
+          "Améliorez l’attrait visuel de votre propriété avec notre service de photographie professionnelle premium. Service uniquement disponible à Casablanca, Rabat et Marrakech.",
+        price: "MAD 3,600",
+        tag: "Recommandé",
       },
       {
         icon: <FaVideo className="text-yellow-500 text-xl" />,
-        title: "Verified Videography Credits",
+        title: "Crédits pour vidéographie vérifiée",
         description:
-          "Bring your property to life with our captivating videography service. Service only available in Karachi, Lahore & Islamabad.",
-        price: "Rs 12,000",
-        tag: "Recommended",
+          "Donnez vie à votre propriété avec notre service de vidéographie captivant. Service uniquement disponible à Casablanca, Rabat et Marrakech.",
+        price: "MAD 12,000",
+        tag: "Recommandé",
       },
+
     ],
   },
 ];

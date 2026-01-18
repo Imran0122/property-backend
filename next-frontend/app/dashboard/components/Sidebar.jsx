@@ -36,7 +36,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       <div className="flex items-center justify-between mb-10 px-2">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-green-600 rounded"></div>
-          <span className="text-lg font-semibold tracking-tight">Profolio</span>
+          <span className="text-lg font-semibold tracking-tight">Portefeuille</span>
         </div>
         <button
           className="lg:hidden p-1 rounded hover:bg-gray-100"
@@ -49,21 +49,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       {/* Navigation */}
       <nav className="flex flex-col gap-2.5 text-sm overflow-y-auto">
         <Link
-          href="#"
+          href="/dashboard"
           onClick={() => setActive("Dashboard")}
           className={linkClass("Dashboard")}
         >
           <LayoutDashboard size={16} />
-          Dashboard
+          Tableau de bord
         </Link>
 
         <Link
-          href="#"
+          href="/dashboard/post-listing"
           onClick={() => setActive("Post Listing")}
           className={linkClass("Post Listing")}
         >
           <PlusCircle size={16} />
-          Post Listing
+          Publier une annonce
         </Link>
 
         {/* Property Management */}
@@ -78,36 +78,36 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           >
             <span className="flex items-center gap-3">
               <Building2 size={16} />
-              Property Management
+              Gestion des propriétés
             </span>
             {openPropMgmt ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {openPropMgmt && (
             <div className="ml-10 mt-1 flex flex-col gap-1 text-gray-600">
-              <Link href="#" className="hover:text-green-600 text-sm">
-                All Listings
+              <Link href="/dashboard/property-management/all-listings" className="hover:text-green-600 text-sm">
+               Toutes les annonces
               </Link>
             </div>
           )}
         </div>
 
         <Link
-          href="#"
+          href="/dashboard/inbox"
           onClick={() => setActive("Inbox")}
           className={linkClass("Inbox")}
         >
           <Inbox size={16} />
-          Inbox
+          Boîte de réception
         </Link>
 
         <Link
-          href="#"
+          href="/dashboard/settings"
           onClick={() => setActive("Settings")}
           className={linkClass("Settings")}
         >
           <Settings size={16} />
-          Settings
+          Paramètres
         </Link>
 
         {/* Prop Shop */}
@@ -122,18 +122,18 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           >
             <span className="flex items-center gap-3">
               <ShoppingBag size={16} />
-              Prop Shop
+              Boutique de propriétés
             </span>
             {openPropShop ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {openPropShop && (
             <div className="ml-10 mt-1 flex flex-col gap-1 text-gray-600">
-              <Link href="#" className="hover:text-green-600 text-sm">
-                Buy Products
+              <Link href="/dashboard/prop-shop/buy-products" className="hover:text-green-600 text-sm">
+                Acheter des produits
               </Link>
-              <Link href="#" className="hover:text-green-600 text-sm">
-                Order History
+              <Link href="/dashboard/prop-shop/order-history" className="hover:text-green-600 text-sm">
+                Historique des commandes
               </Link>
             </div>
           )}
@@ -143,7 +143,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       {/* Chat Button */}
       <div className="mt-auto pt-4">
         <button className="bg-green-600 text-white w-full py-2 rounded-full font-medium flex items-center justify-center gap-2 hover:bg-green-700 transition">
-          💬 Chat
+          💬 Discussion
         </button>
       </div>
     </aside>

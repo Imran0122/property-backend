@@ -8,7 +8,7 @@ export default function AdInfo(){
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-3 flex items-start">
           <div className="bg-green-100 p-3 rounded-md inline-flex">📝</div>
-          <div className="ml-3 hidden md:block"><p className="text-sm text-gray-600">Ad Information</p></div>
+          <div className="ml-3 hidden md:block"><p className="text-sm text-gray-600">Informations sur l’annonce</p></div>
         </div>
         <div className="col-span-12 md:col-span-9">
           <label className="text-sm text-gray-700">Title</label>

@@ -10,20 +10,21 @@ export default function ListingTable({ listings = [], loading = false }) {
         <table className="min-w-full w-full bg-white">
           <thead className="text-sm text-gray-500 border-b">
             <tr>
-              <th className="px-4 py-3 text-left">Property</th>
-              <th className="px-4 py-3 text-left">Platform</th>
-              <th className="px-4 py-3 text-left">Stats</th>
-              <th className="px-4 py-3 text-left">Posted On</th>
-              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-left">Propriété</th>
+              <th className="px-4 py-3 text-left">Plateforme</th>
+              <th className="px-4 py-3 text-left">Statistiques</th>
+              <th className="px-4 py-3 text-left">Publié le</th>
+              <th className="px-4 py-3 text-left">Statut</th>
               <th className="px-4 py-3 text-left">Actions</th>
+
             </tr>
           </thead>
 
           <tbody className="text-sm text-gray-700">
             {loading ? (
-              <tr><td colSpan="6" className="p-6 text-center">Loading...</td></tr>
+              <tr><td colSpan="6" className="p-6 text-center">Chargement...</td></tr>
             ) : listings.length === 0 ? (
-              <tr><td colSpan="6" className="p-6 text-center">No listings found</td></tr>
+              <tr><td colSpan="6" className="p-6 text-center">Aucune annonce trouvée</td></tr>
             ) : (
               listings.map(item => <ListingRow key={item.id} item={item} />)
             )}

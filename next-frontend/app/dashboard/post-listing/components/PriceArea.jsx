@@ -14,10 +14,10 @@ export default function PriceArea() {
         </div>
         <div>
           <h2 className="text-[15px] font-semibold text-gray-900">
-            Price and Area
+            Prix et Surface
           </h2>
           <p className="text-xs text-gray-500">
-            Specify property price and land area.
+            Spécifiez le prix de la propriété et la superficie du terrain.
           </p>
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function PriceArea() {
         {/* Price */}
         <div>
           <label className="block text-[13px] font-medium text-gray-900 mb-1">
-            Price
+            Prix
           </label>
           <div className="relative">
             <DollarSign
@@ -45,7 +45,7 @@ export default function PriceArea() {
         {/* Land Area */}
         <div>
           <label className="block text-[13px] font-medium text-gray-900 mb-1">
-            Land Area
+            Superficie du terrain
           </label>
           <div className="flex gap-3">
             <div className="relative flex-1">
@@ -64,11 +64,11 @@ export default function PriceArea() {
               onChange={(e) => setUnit(e.target.value)}
               className="w-[120px] border border-gray-300 rounded-md text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option>Marla</option>
-              <option>Kanal</option>
+              <option>250 m²</option>
+              <option>500 m²</option>
               <option>Sq. Ft</option>
               <option>Sq. Yd</option>
-              <option>Acre</option>
+              <option>1 ha</option>
             </select>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function PriceArea() {
 
       {/* Estimated Hint */}
       <p className="text-xs text-gray-500 mt-3">
-        Note: The price and land area help buyers estimate value accurately.
+       Remarque : Le prix et la superficie du terrain aident les acheteurs à estimer la valeur avec précision.
       </p>
     </div>
   );

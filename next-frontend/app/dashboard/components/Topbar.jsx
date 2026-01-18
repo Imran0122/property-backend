@@ -22,7 +22,7 @@ export default function Topbar({ setSidebarOpen }) {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <img src="/logo.svg" alt="Profolio" className="w-7 h-7" />
-          <span className="text-lg font-semibold text-gray-800">Profolio</span>
+          <span className="text-lg font-semibold text-gray-800">Portefeuille</span>
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export default function Topbar({ setSidebarOpen }) {
             target="_blank"
             className="text-sm text-gray-600 hover:text-green-600 flex items-center gap-1"
           >
-            <span>Go to Hectare.ma</span>
+            <span>Aller sur Hectare.ma</span>
           </Link>
 
           <Link
@@ -43,7 +43,7 @@ export default function Topbar({ setSidebarOpen }) {
             className="text-sm text-gray-700 border border-gray-200 px-3 py-1.5 rounded-md hover:text-green-600 font-medium flex items-center gap-2"
           >
             <img src="/icons/listing.svg" alt="" className="w-4 h-4" />
-            My Listings
+            Mes annonces
           </Link>
 
           <Link
@@ -51,7 +51,7 @@ export default function Topbar({ setSidebarOpen }) {
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition"
           >
             <PlusCircle size={16} />
-            Post Listing
+            Publier une annonce
           </Link>
         </div>
 

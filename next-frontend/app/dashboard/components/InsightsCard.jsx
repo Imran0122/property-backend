@@ -31,9 +31,12 @@ import React from "react";
 export default function InsightsCard() {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm max-w-7xl mx-auto">
-      <h4 className="text-base font-semibold text-gray-800">Insights</h4>
-      <p className="text-sm text-gray-500 mt-2">Get valuable insights into your listing performance and improve visibility.</p>
-      <a className="mt-3 inline-block text-green-600 font-medium" href="#">View Insights →</a>
+      <h4 className="text-base font-semibold text-gray-800">Aperçus</h4>
+      <p className="text-sm text-gray-500 mt-2">
+        Obtenez des informations précieuses sur les performances de vos annonces et améliorez leur visibilité.
+      </p>
+      <a className="mt-3 inline-block text-green-600 font-medium" href="#">Voir les aperçus →</a>
+
     </div>
   );
 }

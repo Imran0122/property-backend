@@ -23,12 +23,12 @@ export default function Dashboard() {
           {/* Header Section */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
               <a
                 href="#"
                 className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
               >
-                View all Zameen Listings
+                Voir toutes les annonces Hectare
                 <svg
                   width="16"
                   height="16"
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
           {/* Footer */}
           <div className="text-center py-6 text-sm text-gray-500">
-            © 2025 - Powered by Zameen.com
+            © 2025 - Propulsé par Hectare.ma
           </div>
         </main>
       </div>

@@ -33,10 +33,11 @@ export default function TopFilters({ onShowMore = () => {}, onSearch = () => {} 
             onChange={(e) => setPropertyType(e.target.value)}
             className="border rounded-md px-3 py-2 text-sm w-full sm:w-48"
           >
-            <option value="">Select Property Types</option>
-            <option>House</option>
-            <option>Plot</option>
-            <option>Commercial</option>
+            <option value="">Sélectionner le type de propriété</option>
+<option>Maison</option>
+<option>Terrain</option>
+<option>Commercial</option>
+
           </select>
 
           <select
@@ -44,9 +45,10 @@ export default function TopFilters({ onShowMore = () => {}, onSearch = () => {} 
             onChange={(e) => setPurpose(e.target.value)}
             className="border rounded-md px-3 py-2 text-sm w-full sm:w-48"
           >
-            <option value="">Select Purpose</option>
-            <option>Sell</option>
-            <option>Rent</option>
+           <option value="">Sélectionner l’objectif</option>
+<option>Vente</option>
+<option>Location</option>
+
           </select>
         </div>
 
@@ -55,7 +57,7 @@ export default function TopFilters({ onShowMore = () => {}, onSearch = () => {} 
           <input
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            placeholder="Select Date Range"
+            placeholder="Sélectionner une plage de dates"
             className="border rounded-md px-3 py-2 text-sm w-48"
           />
 
@@ -63,16 +65,16 @@ export default function TopFilters({ onShowMore = () => {}, onSearch = () => {} 
             type="button"
             onClick={onShowMore}
             className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
-            aria-label="Open advanced filters"
+            aria-label="Ouvrir les filtres avancés"
           >
-            <Sliders size={16} /> Show More
+            <Sliders size={16} /> Afficher plus
           </button>
 
           <button
             type="submit"
             className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
           >
-            <Search size={16} /> Search
+            <Search size={16} />Rechercher
           </button>
         </div>
       </div>

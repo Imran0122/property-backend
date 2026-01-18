@@ -3,15 +3,16 @@ import { useState } from 'react';
 
 const ListingGrid = () => {
   const [activeTab, setActiveTab] = useState('All');
-  const tabs = ['All', 'For Sale', 'For Rent'];
-  const metrics = [
-    { name: 'Clicks', value: 0 },
-    { name: 'Leads', value: 0 },
-    { name: 'Calls', value: 0 },
-    { name: 'WhatsApp', value: 0 },
-    { name: 'SMS', value: 0 },
-    { name: 'Emails', value: 0 },
-  ];
+const tabs = ['Tous', 'À vendre', 'À louer'];
+const metrics = [
+  { name: 'Clics', value: 0 },
+  { name: 'Contacts', value: 0 },
+  { name: 'Appels', value: 0 },
+  { name: 'WhatsApp', value: 0 },
+  { name: 'SMS', value: 0 },
+  { name: 'Emails', value: 0 },
+];
+
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
@@ -32,7 +33,7 @@ const ListingGrid = () => {
           ))}
         </div>
         <div className="flex items-center border border-gray-300 rounded-md px-3 py-1 text-sm bg-white mt-3 sm:mt-0">
-          Last 30 Days 📅
+          30 derniers jours 📅
         </div>
       </div>
 

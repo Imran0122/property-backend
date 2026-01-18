@@ -127,7 +127,7 @@ export default function TopStatsSection() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-[15px] font-semibold text-gray-800">Listings</h3>
-          <a href="#" className="text-green-600 hover:text-green-700 text-sm font-medium">View all Zameen Listings</a>
+          <a href="#" className="text-green-600 hover:text-green-700 text-sm font-medium">View all Hectare Listings</a>
         </div>
 
         <div className="flex items-center">
@@ -137,7 +137,7 @@ export default function TopStatsSection() {
               <Home size={18} className="text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Active</p>
+              <p className="text-sm text-gray-600">Actif</p>
               <p className="text-2xl font-bold text-gray-900">0</p>
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function TopStatsSection() {
                 <div className="bg-green-50 p-2 rounded-md">
                   <DollarSign size={14} className="text-green-600" />
                 </div>
-                <span className="text-sm text-gray-700">For Sale</span>
+                <span className="text-sm text-gray-700">À vendre</span>
               </div>
               <p className="text-base font-bold text-gray-900">0</p>
             </div>
@@ -159,7 +159,7 @@ export default function TopStatsSection() {
                 <div className="bg-blue-50 p-2 rounded-md">
                   <RefreshCw size={14} className="text-blue-600" />
                 </div>
-                <span className="text-sm text-gray-700">For Rent</span>
+                <span className="text-sm text-gray-700">À louer</span>
               </div>
               <p className="text-base font-bold text-gray-900">0</p>
             </div>
@@ -169,7 +169,7 @@ export default function TopStatsSection() {
                 <div className="bg-red-50 p-2 rounded-md">
                   <Flame size={14} className="text-red-500" />
                 </div>
-                <span className="text-sm text-gray-700">Super Hot</span>
+                <span className="text-sm text-gray-700">Très populaire</span>
               </div>
               <p className="text-base font-bold text-gray-900">0</p>
             </div>
@@ -179,7 +179,7 @@ export default function TopStatsSection() {
                 <div className="bg-yellow-50 p-2 rounded-md">
                   <Bolt size={14} className="text-yellow-500" />
                 </div>
-                <span className="text-sm text-gray-700">Hot</span>
+                <span className="text-sm text-gray-700">Populaire</span>
               </div>
               <p className="text-base font-bold text-gray-900">0</p>
             </div>
@@ -189,22 +189,23 @@ export default function TopStatsSection() {
 
       {/* Quota & Credits Box */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-[15px] font-semibold text-gray-800 mb-4">Quota and Credits</h3>
+        <h3 className="text-[15px] font-semibold text-gray-800 mb-4">Quota et crédits</h3>
 
         <div className="flex items-center gap-6 border-b border-gray-100 pb-4 mb-4">
-          <button className="text-sm font-medium text-green-600 border-b-2 border-green-600 pb-2">Listing Quota (0)</button>
-          <button className="text-sm text-gray-500">Refresh Credits (0)</button>
-          <button className="text-sm text-gray-500">Hot Credits (0)</button>
-          <button className="text-sm text-gray-500">Super Hot Credits (0)</button>
+          <button className="text-sm font-medium text-green-600 border-b-2 border-green-600 pb-2">Quota d'annonces (0)</button>
+          <button className="text-sm text-gray-500">Rafraîchir les crédits (0)</button>
+          <button className="text-sm text-gray-500">Crédits Populaires (0)</button>
+          <button className="text-sm text-gray-500">Crédits Très Populaires (0)</button>
+
         </div>
 
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
           <div>
-            <p className="text-xs text-gray-500">Available Quota</p>
+            <p className="text-xs text-gray-500">Quota disponible</p>
             <p className="font-bold text-gray-900">0</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Used</p>
+            <p className="text-xs text-gray-500">Utilisé</p>
             <p className="font-bold text-gray-900">0</p>
           </div>
           <div>

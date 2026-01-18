@@ -2,7 +2,8 @@
 "use client";
 import React from "react";
 
-const tabList = ["Active","Pending","Rejected","Expired","Deleted","Downgraded","Inactive"];
+const tabList = ["Actif", "En attente", "Rejeté", "Expiré", "Supprimé", "Rétrogradé", "Inactif"]
+;
 
 export default function Tabs({ active, setActive }) {
   return (
@@ -18,7 +19,7 @@ export default function Tabs({ active, setActive }) {
           {tab} <span className="ml-1 text-xs text-gray-400">(0)</span>
         </button>
       ))}
-      <div className="ml-auto text-sm text-green-600 cursor-pointer">Show More</div>
+      <div className="ml-auto text-sm text-green-600 cursor-pointer">Afficher plus</div>
     </div>
   );
 }

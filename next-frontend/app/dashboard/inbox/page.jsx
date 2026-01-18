@@ -22,7 +22,7 @@ const InboxPage = () => {
               }`}
             >
               <FaInbox className="text-lg" />
-              Inbox
+              Boîte de réception
             </button>
 
             {/* Trash Tab */}
@@ -49,7 +49,7 @@ const InboxPage = () => {
               className="w-40 mb-4 opacity-70"
             />
             <p className="text-[#222] text-base font-semibold">
-              No Record Found
+            Aucun enregistrement trouvé
             </p>
           </div>
         </div>
@@ -57,7 +57,7 @@ const InboxPage = () => {
 
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 mt-10">
-        © 2025 – Powered by Zameen.com
+        © 2025 – Propulsé par Hectare.ma
       </footer>
     </div>
   );

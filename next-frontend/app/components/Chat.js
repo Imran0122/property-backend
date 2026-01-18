@@ -40,7 +40,7 @@ export default function Chat() {
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white shadow-lg rounded-lg p-6">
-      <h2 className="text-xl font-bold mb-4">💬 Real-Time Chat</h2>
+      <h2 className="text-xl font-bold mb-4">💬 Chat en temps réel</h2>
 
       {/* Messages */}
       <div className="h-64 overflow-y-auto border p-3 mb-4">
@@ -64,7 +64,7 @@ export default function Chat() {
           onClick={sendMessage}
           className="bg-green-600 text-white px-4 py-2 rounded"
         >
-          Send
+          Envoyer
         </button>
       </div>
     </div>

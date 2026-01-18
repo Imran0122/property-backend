@@ -104,20 +104,21 @@
 import React from "react";
 
 export default function AnalyticsSection() {
-  const items = ["Views", "Clicks", "Leads", "Calls", "WhatsApp", "SMS", "Emails"];
+ const items = ["Vues", "Clics", "Prospects", "Appels", "WhatsApp", "SMS", "E-mails"];
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-gray-700">Analytics</h2>
+        <h2 className="font-semibold text-gray-700">Analytique</h2>
 
         <div className="flex items-center gap-3 text-sm">
           <button className="text-green-600 font-medium border-b-2 border-green-600 pb-1">
             All
           </button>
-          <button className="text-gray-500 hover:text-green-600">For Sale</button>
-          <button className="text-gray-500 hover:text-green-600">For Rent</button>
-          <button className="text-gray-500 hover:text-green-600">Last 30 Days</button>
+         <button className="text-gray-500 hover:text-green-600">À Vendre</button>  
+<button className="text-gray-500 hover:text-green-600">À Louer</button>  
+<button className="text-gray-500 hover:text-green-600">Derniers 30 jours</button>  
+
         </div>
       </div>
 
@@ -129,17 +130,17 @@ export default function AnalyticsSection() {
           >
             <p className="font-semibold text-gray-800">0</p>
             <p className="text-xs text-gray-500">{item}</p>
-            <p className="text-xs text-gray-400 mt-1">No Data</p>
+            <p className="text-xs text-gray-400 mt-1">Pas de données</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <div className="text-green-600 text-3xl mb-2">📊</div>
-        <p className="font-medium text-gray-700">View In-Depth Insights</p>
-        <p className="text-sm text-gray-500 mt-1">
-          See the number of views, clicks, and leads your listings have received.
-        </p>
+       <p className="font-medium text-gray-700">Voir les analyses détaillées</p>
+<p className="text-sm text-gray-500 mt-1">
+  Voyez le nombre de vues, de clics et de prospects que vos annonces ont reçus.
+</p>
       </div>
     </div>
   );

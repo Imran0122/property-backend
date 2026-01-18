@@ -160,11 +160,11 @@ export default function PerformanceSection() {
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Performance Overview</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Aperçu des performances</h2>
         <select className="border border-gray-300 text-gray-600 text-sm rounded-md px-3 py-1 focus:outline-none">
-          <option>Last 30 Days</option>
-          <option>Last 60 Days</option>
-          <option>Last 90 Days</option>
+  <option>30 derniers jours</option>
+<option>60 derniers jours</option>
+<option>90 derniers jours</option>
         </select>
       </div>
 
@@ -195,12 +195,12 @@ export default function PerformanceSection() {
 
       {/* Empty State */}
       <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg py-10 text-center">
-        <h3 className="text-gray-800 font-semibold text-lg">No Active Listings Found</h3>
+        <h3 className="text-gray-800 font-semibold text-lg">Aucune annonce active trouvée</h3>
         <p className="text-gray-500 text-sm mt-1">
-          Start by adding your first property listing to get insights and leads.
+          Commencez par ajouter votre première annonce immobilière pour obtenir des analyses et des prospects.
         </p>
         <button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md text-sm font-medium">
-          Add Property
+          Ajouter une annonce
         </button>
       </div>
     </div>

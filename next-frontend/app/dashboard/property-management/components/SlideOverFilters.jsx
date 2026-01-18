@@ -44,7 +44,7 @@ export default function SlideOverFilters({ open = false, onClose = () => {}, onA
       {/* Panel */}
       <aside className={clsx("ml-auto w-full sm:w-[420px] bg-white h-full shadow-xl transform transition-transform", { "translate-x-0": open })}>
         <div className="p-4 border-b flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Advanced Filters</h3>
+          <h3 className="text-lg font-semibold">Filtres avancés</h3>
           <button onClick={onClose} className="p-2 rounded-md hover:bg-gray-100">
             <X />
           </button>
@@ -52,28 +52,28 @@ export default function SlideOverFilters({ open = false, onClose = () => {}, onA
 
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-72px)]">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Category</label>
+            <label className="block text-sm text-gray-600 mb-2">Catégorie</label>
             <select value={local.category} onChange={(e)=>setLocal({...local, category:e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
-              <option value="">Select Category</option>
+              <option value="">Sélectionner une catégorie</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">City</label>
+            <label className="block text-sm text-gray-600 mb-2">ville</label>
             <select value={local.city} onChange={(e)=>setLocal({...local, city:e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
-              <option value="">Select City</option>
+              <option value="">Sélectionner la ville</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Location</label>
+            <label className="block text-sm text-gray-600 mb-2">Emplacement</label>
             <select value={local.location} onChange={(e)=>setLocal({...local, location:e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
-              <option value="">Select Location</option>
+              <option value="">Sélectionner l’emplacement</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Price Range</label>
+            <label className="block text-sm text-gray-600 mb-2">Fourchette de prix</label>
             <div className="grid grid-cols-2 gap-3">
               <input value={local.minPrice} onChange={(e)=>setLocal({...local, minPrice:e.target.value})} placeholder="Min" className="border rounded-md px-3 py-2 text-sm" />
               <input value={local.maxPrice} onChange={(e)=>setLocal({...local, maxPrice:e.target.value})} placeholder="Max" className="border rounded-md px-3 py-2 text-sm" />
@@ -81,9 +81,9 @@ export default function SlideOverFilters({ open = false, onClose = () => {}, onA
           </div>
 
           <div className="flex items-center justify-between mt-6">
-            <button onClick={() => setLocal({ category: "", city: "", location: "", minPrice: "", maxPrice: "" })} className="px-4 py-2 border rounded-md">Reset Filters</button>
+            <button onClick={() => setLocal({ category: "", city: "", location: "", minPrice: "", maxPrice: "" })} className="px-4 py-2 border rounded-md">Réinitialiser les filtres</button>
             <div className="flex items-center gap-2">
-              <button onClick={apply} className="px-4 py-2 bg-green-600 text-white rounded-md">Search</button>
+              <button onClick={apply} className="px-4 py-2 bg-green-600 text-white rounded-md">Rechercher</button>
             </div>
           </div>
         </div>

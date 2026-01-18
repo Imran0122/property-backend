@@ -51,22 +51,24 @@ export default function RecentListings() {
   const [listings] = useState([
     {
       id: 1,
-      title: "Beautiful House in Old City",
+      title: "Belle maison dans la vieille ville",
       price: 9000000,
       city: "Bahawalpur",
       area_text: "5 Marla",
       bedrooms: 4,
       bathrooms: 3,
       images: [{ url: "/placeholder-house.jpg" }],
-      status: "Inactive",
+      status: "Inactif",
     },
+
   ]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mt-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800">Your Listings</h3>
-        <div className="text-sm text-gray-500">Showing recently added</div>
+        <h3 className="text-lg font-semibold text-gray-800">Vos annonces</h3>
+        <div className="text-sm text-gray-500">Affichage des ajouts récents</div>
+
       </div>
 
       <div className="mt-4 overflow-x-auto">
@@ -74,13 +76,14 @@ export default function RecentListings() {
           <thead>
             <tr className="text-left text-xs text-gray-500 border-b">
               <th className="py-3 px-2">#</th>
-              <th className="py-3 px-2">Property</th>
-              <th className="py-3 px-2">Location</th>
-              <th className="py-3 px-2">Price</th>
-              <th className="py-3 px-2">Beds</th>
-              <th className="py-3 px-2">Baths</th>
-              <th className="py-3 px-2">Status</th>
+              <th className="py-3 px-2">Propriété</th>
+              <th className="py-3 px-2">Emplacement</th>
+              <th className="py-3 px-2">Prix</th>
+              <th className="py-3 px-2">Chambres</th>
+              <th className="py-3 px-2">Salles de bain</th>
+              <th className="py-3 px-2">Statut</th>
               <th className="py-3 px-2">Actions</th>
+
             </tr>
           </thead>
           <tbody>
@@ -105,16 +108,17 @@ export default function RecentListings() {
                 </td>
                 <td className="py-3 px-2">
                   <div className="flex gap-2">
-                    <button className="px-2 py-1 text-xs border rounded-md">Edit</button>
-                    <button className="px-2 py-1 text-xs border rounded-md">View</button>
-                    <button className="px-2 py-1 text-xs border rounded-md">Delete</button>
+                    <button className="px-2 py-1 text-xs border rounded-md">Modifier</button>
+                    <button className="px-2 py-1 text-xs border rounded-md">Voir</button>
+                    <button className="px-2 py-1 text-xs border rounded-md">Supprimer</button>
+
                   </div>
                 </td>
               </tr>
             ))}
             {listings.length === 0 && (
               <tr>
-                <td colSpan="8" className="text-center py-6 text-gray-500">No listings yet</td>
+                <td colSpan="8" className="text-center py-6 text-gray-500">ucune annonce pour le moment</td>
               </tr>
             )}
           </tbody>

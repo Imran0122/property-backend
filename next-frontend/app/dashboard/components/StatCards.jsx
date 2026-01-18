@@ -2,10 +2,11 @@
 
 const StatCards = () => {
   const stats = [
-    { title: 'For Sale', value: 12, color: 'bg-blue-100 text-blue-700' },
-    { title: 'For Rent', value: 8, color: 'bg-yellow-100 text-yellow-700' },
-    { title: 'Hot', value: 3, color: 'bg-red-100 text-red-700' },
-    { title: 'Super Hot', value: 1, color: 'bg-green-100 text-green-700' },
+  { title: 'À vendre', value: 12, color: 'bg-blue-100 text-blue-700' },
+{ title: 'À louer', value: 8, color: 'bg-yellow-100 text-yellow-700' },
+{ title: 'Populaire', value: 3, color: 'bg-red-100 text-red-700' },
+{ title: 'Très populaire', value: 1, color: 'bg-green-100 text-green-700' },
+
   ];
 
   return (

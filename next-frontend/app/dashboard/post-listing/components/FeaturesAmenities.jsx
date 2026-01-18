@@ -11,11 +11,11 @@ export default function FeaturesAmenities(){
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-3 flex items-start">
           <div className="bg-green-100 p-3 rounded-md inline-flex">🏷️</div>
-          <div className="ml-3 hidden md:block"><p className="text-sm text-gray-600">Feature and Amenities</p></div>
+          <div className="ml-3 hidden md:block"><p className="text-sm text-gray-600">Caractéristiques et équipements</p></div>
         </div>
         <div className="col-span-12 md:col-span-9">
           <div className="mb-4">
-            <p className="text-sm text-gray-700 mb-2">Bedrooms</p>
+            <p className="text-sm text-gray-700 mb-2">Chambres</p>
             <div className="flex flex-wrap gap-2">
               {bedrooms.map((b,i)=> (
                 <button key={i} onClick={()=>setSelectedBed(b)} className={`px-3 py-1 rounded-full border ${selectedBed===b? 'bg-green-50 border-green-300 text-green-700' : 'bg-white'}`}>
@@ -26,7 +26,7 @@ export default function FeaturesAmenities(){
           </div>
 
           <div className="mb-4">
-            <p className="text-sm text-gray-700 mb-2">Bathrooms</p>
+            <p className="text-sm text-gray-700 mb-2">Salles de bain</p>
             <div className="flex flex-wrap gap-2">
               {bathrooms.map((b,i)=> (
                 <button key={i} onClick={()=>setSelectedBath(b)} className={`px-3 py-1 rounded-full border ${selectedBath===b? 'bg-green-50 border-green-300 text-green-700' : 'bg-white'}`}>
@@ -37,11 +37,11 @@ export default function FeaturesAmenities(){
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">Feature and Amenities</div>
-            <button className="bg-green-600 text-white px-3 py-1 rounded">Add Amenities</button>
+            <div className="text-sm text-gray-600">Caractéristiques et commodités</div>
+            <button className="bg-green-600 text-white px-3 py-1 rounded">Ajouter des commodités</button>
           </div>
 
-          <div className="mt-4 bg-green-50 p-3 rounded-md text-sm text-gray-700">Quality Tip — Add at least 5 amenities</div>
+          <div className="mt-4 bg-green-50 p-3 rounded-md text-sm text-gray-700">Astuce qualité — Ajoutez au moins 5 commodités</div>
         </div>
       </div>
     </section>

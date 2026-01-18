@@ -30,12 +30,13 @@ export default function EmptyState() {
     <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm text-center">
       <div className="mb-4">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-          <path d="M3 5h18v14H3z" stroke="#D1D5DB" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M3 5h18v14H3z" stroke="#D1D5DB" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-gray-800">No Active Listings</h3>
-      <p className="text-sm text-gray-500 mt-1">Your active listings will appear here</p>
-      <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md">Post Listing</button>
+      <h3 className="text-lg font-semibold text-gray-800">Aucune annonce active</h3>
+      <p className="text-sm text-gray-500 mt-1">Vos annonces actives apparaîtront ici</p>
+      <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md">Publier une annonce</button>
+
     </div>
   );
 }

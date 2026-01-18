@@ -25,8 +25,9 @@ export default function FilterBar({ openDrawer }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={openDrawer} className="text-sm text-green-600">Show More</button>
-          <button className="bg-green-600 text-white text-sm px-4 py-2 rounded-md">Search</button>
+          <button onClick={openDrawer} className="text-sm text-green-600">Afficher plus</button>
+          <button className="bg-green-600 text-white text-sm px-4 py-2 rounded-md">Rechercher</button>
+
         </div>
       </div>
     </div>

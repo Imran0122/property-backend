@@ -7,10 +7,10 @@ export default function InsightsEmpty() {
     <div className="flex flex-col items-center justify-center p-10 text-center border border-gray-200 rounded-lg bg-gray-50">
       <BarChart3 className="text-green-600 w-12 h-12 mb-3" />
       <h3 className="text-lg font-semibold text-gray-800 mb-1">
-        View In-Depth Insights
+        Voir les analyses détaillées
       </h3>
       <p className="text-sm text-gray-500">
-        See the number of views, clicks, and leads your listings have received.
+        Consultez le nombre de vues, de clics et de contacts générés par vos annonces.
       </p>
     </div>
   );

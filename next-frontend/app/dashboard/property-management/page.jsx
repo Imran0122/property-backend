@@ -24,16 +24,17 @@ export default function PropertyManagementPage() {
       } catch (e) {
         setListings([
           {
-            id: 53246261,
-            title: "Beautiful House in Old City",
-            price: 9000000,
-            city: "Bahawalpur",
-            area_text: "5 Marla",
-            bedrooms: 4,
-            bathrooms: 3,
-            images: [{ url: "/placeholder-house.jpg" }],
-            status: "inactive",
-          },
+  id: 53246261,
+  title: "Belle maison dans la vieille ville",
+  price: 9000000, // You can convert to MAD if needed
+  city: "Casablanca",
+  area_text: "5 Marla",
+  bedrooms: 4,
+  bathrooms: 3,
+  images: [{ url: "/placeholder-house.jpg" }],
+  status: "inactive",
+},
+
         ]);
       } finally {
         setLoading(false);
@@ -59,17 +60,17 @@ export default function PropertyManagementPage() {
         <div className="mt-8 space-y-6 w-full">
           <div className="bg-white rounded-xl shadow-sm p-5">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="text-lg font-semibold">Listings</h3>
+              <h3 className="text-lg font-semibold">Annonces</h3>
               <a
                 href="#"
                 className="text-green-600 text-sm font-medium hover:underline"
               >
-                View all Zameen Listings
+                Voir toutes les annonces Hectare.ma
               </a>
             </div>
 
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {["Active", "For Sale", "For Rent", "Hot"].map((label) => (
+              {["Actif", "À vendre", "À louer", "Hot"].map((label) => (
                 <div key={label} className="bg-gray-50 p-4 rounded-lg text-center">
                   <div className="text-sm text-gray-500">{label}</div>
                   <div className="mt-2 text-2xl font-bold">0</div>

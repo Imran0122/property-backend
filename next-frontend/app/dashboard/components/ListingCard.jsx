@@ -31,7 +31,7 @@ export default function ListingCard({ property }) {
             <div className="text-sm text-gray-500">{property.city?.name ?? property.location}</div>
           </div>
 
-          <div className="text-[var(--brand-green)] font-bold">PKR {Number(property.price || 0).toLocaleString()}</div>
+          <div className="text-[var(--brand-green)] font-bold">MAD {Number(property.price || 0).toLocaleString()}</div>
         </div>
 
         <div className="mt-3 flex items-center justify-between text-sm">

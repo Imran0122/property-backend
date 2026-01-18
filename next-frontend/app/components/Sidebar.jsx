@@ -5,14 +5,14 @@ export default function Sidebar() {
       <div className="space-y-3">
         <div className="border rounded-md p-2">
           <img src="/property.jpg" alt="Ad" className="w-full h-32 object-cover rounded-md" />
-          <h4 className="text-sm mt-2 font-medium">DHA Lahore Phase 6</h4>
-          <p className="text-xs text-gray-500">By ABC Developers</p
+          <h4 className="text-sm mt-2 font-medium">Quartier Anfa, Casablanca</h4>
+          <p className="text-xs text-gray-500">Par ABC Développeurs</p
           >
         </div>
         <div className="border rounded-md p-2">
           <img src="/property.jpg" alt="Ad" className="w-full h-32 object-cover rounded-md" />
-          <h4 className="text-sm mt-2 font-medium">Bahria Town Karachi</h4>
-          <p classing="text-xs text-gray-500">By Bahria Builders</p>
+          <h4 className="text-sm mt-2 font-medium">Bahria Town Casablanca</h4>
+          <p className="text-xs text-gray-500">Par Bahria Constructeurs</p>
         </div>
       </div>
     </aside>
