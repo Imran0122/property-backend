@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <title>Property Website</title>
-    @vite('resources/js/app.js')
+    
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
 
