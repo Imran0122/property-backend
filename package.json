@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "$schema": "https://json.schemastore.org/package.json",
     "private": true,
     "type": "module",
@@ -25,4 +26,13 @@
     "dependencies": {
         "pusher-js": "^8.4.0"
     }
+=======
+  "name": "demo-repo",
+  "version": "0.2.0",
+  "description": "A sample package.json",
+  "dependencies": {
+    "@primer/css": "17.0.1"
+  },
+  "license": "MIT"
+>>>>>>> 2fd9e1fce7f99e2d922f31069fdc8c6f0c31270d
 }
