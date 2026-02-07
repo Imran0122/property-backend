@@ -13,7 +13,9 @@ class ProjectUnit extends Model
         'project_id','title','type','bedrooms','bathrooms','area','price','status'
     ];
 
-    public function project() {
-        return $this->belongsTo(Project::class);
-    }
+    public function project()
+{
+    return $this->belongsTo(Project::class, 'project_id');
+}
+
 }

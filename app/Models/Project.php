@@ -17,7 +17,9 @@ class Project extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function units() {
-        return $this->hasMany(ProjectUnit::class);
-    }
+   public function units()
+{
+    return $this->hasMany(ProjectUnit::class, 'project_id');
+}
+
 }

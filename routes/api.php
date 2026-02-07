@@ -23,6 +23,7 @@ use App\Http\Controllers\API\Admin\AdminPropertyController;
 use App\Http\Controllers\API\Admin\AdminAgentController;
 use App\Http\Controllers\API\Admin\PropertyApprovalController;
 use App\Http\Controllers\API\Admin\AgentApprovalController;
+use App\Http\Controllers\Api\HomeApiController;
 // use App\Http\Controllers\API\Admin\InquiryController;
 
 
@@ -77,6 +78,8 @@ Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
+Route::get('/home/projects', [HomeController::class, 'projects']);
+
 
 
 
