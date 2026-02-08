@@ -9,9 +9,9 @@ use App\Http\Controllers\API\ProjectController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\AreaController;
 use App\Http\Controllers\API\SearchController;
-use App\Http\Controllers\Api\BrowsePropertiesController;
-use App\Http\Controllers\Api\AgencyController;
-use App\Http\Controllers\Api\PopularLocationController;
+use App\Http\Controllers\API\BrowsePropertiesController;
+use App\Http\Controllers\API\AgencyController;
+use App\Http\Controllers\API\PopularLocationController;
 use App\Http\Controllers\API\BrowseCityController;
 use App\Http\Controllers\API\ViewedPropertyController;
 use App\Http\Controllers\API\BlogController;
@@ -23,7 +23,7 @@ use App\Http\Controllers\API\Admin\AdminPropertyController;
 use App\Http\Controllers\API\Admin\AdminAgentController;
 use App\Http\Controllers\API\Admin\PropertyApprovalController;
 use App\Http\Controllers\API\Admin\AgentApprovalController;
-use App\Http\Controllers\Api\HomeApiController;
+use App\Http\Controllers\API\HomeApiController;
 // use App\Http\Controllers\API\Admin\InquiryController;
 
 
@@ -79,11 +79,6 @@ Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 Route::get('/home/projects', [HomeController::class, 'projects']);
-
-
-
-
-
 
 
 
