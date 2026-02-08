@@ -26,6 +26,14 @@ use App\Http\Controllers\API\Admin\AgentApprovalController;
 use App\Http\Controllers\API\HomeApiController;
 use App\Http\Controllers\API\SavedSearchController;
 use App\Http\Controllers\API\SavedPropertyController;
+use App\Http\Controllers\API\StripeController;
+use App\Http\Controllers\API\PaypalController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\API\FavoriteController;
+use App\Http\Controllers\API\PackageController;
+use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\FeaturePropertyController;
+use App\Http\Controllers\API\PaymentApprovalController;
 
 // use App\Http\Controllers\API\Admin\InquiryController;
 
@@ -151,6 +159,8 @@ Route::prefix('admin')->group(function () {
         'feature'
     ]);
 });
+
+
 
 Route::prefix('admin')->group(function () {
 
