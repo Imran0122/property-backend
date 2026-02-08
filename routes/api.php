@@ -24,6 +24,9 @@ use App\Http\Controllers\API\Admin\AdminAgentController;
 use App\Http\Controllers\API\Admin\PropertyApprovalController;
 use App\Http\Controllers\API\Admin\AgentApprovalController;
 use App\Http\Controllers\API\HomeApiController;
+use App\Http\Controllers\API\SavedSearchController;
+use App\Http\Controllers\API\SavedPropertyController;
+
 // use App\Http\Controllers\API\Admin\InquiryController;
 
 
