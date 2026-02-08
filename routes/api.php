@@ -29,7 +29,6 @@ use App\Http\Controllers\API\SavedPropertyController;
 use App\Http\Controllers\API\StripeController;
 use App\Http\Controllers\API\PaypalController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\FeaturePropertyController;
@@ -130,11 +129,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/favorites', [FavoriteController::class, 'store']);
-    Route::get('/favorites', [FavoriteController::class, 'index']);
-    Route::delete('/favorites/{property_id}', [FavoriteController::class, 'destroy']);
-});
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/favorites', [FavoriteController::class, 'store']);
+//     Route::get('/favorites', [FavoriteController::class, 'index']);
+//     Route::delete('/favorites/{property_id}', [FavoriteController::class, 'destroy']);
+// });
 
 
 Route::prefix('admin')->group(function () {
