@@ -330,6 +330,16 @@ public function showBySlug($slug)
     ]);
 }
 
+public function locationSearch($type, $city)
+{
+    return response()->json([
+        'status' => true,
+        'type'   => $type,
+        'city'   => $city,
+        'message'=> 'Location search API working'
+    ]);
+}
+
 
 
     public function priceRange() { /* same */ }
