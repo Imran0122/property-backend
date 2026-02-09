@@ -4,21 +4,45 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use Illuminate\Support\Facades\Schema;
 
 class BlogController extends Controller
 {
+    // All blogs (listing)
     public function index()
     {
-        $query = Blog::query();
+        $blogs = Blog::where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->get([
+                'id',
+                'title',
+                'slug',
+                'image',
+                'created_at'
+            ]);
 
-        // Safe check: only apply filter if column exists
-        if (Schema::hasColumn('blogs', 'status')) {
-            $query->where('status', 'published');
+        return response()->json([
+            'status' => true,
+            'data' => $blogs
+        ]);
+    }
+
+    // Single blog by slug (DETAIL PAGE)
+    public function show($slug)
+    {
+        $blog = Blog::where('slug', $slug)
+            ->where('status', 'published')
+            ->first();
+
+        if (!$blog) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Blog not found'
+            ], 404);
         }
 
-        return response()->json(
-            $query->latest()->limit(6)->get()
-        );
+        return response()->json([
+            'status' => true,
+            'data' => $blog
+        ]);
     }
 }

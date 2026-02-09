@@ -69,6 +69,7 @@ Route::get('/viewed-properties', [ViewedPropertyController::class, 'index']);
 Route::get('/projects/trending', [ProjectController::class, 'trending']);
 Route::get('/community/blogs', [BlogController::class, 'index']);
 Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/blogs/{slug}', [BlogController::class, 'show']);
 Route::post('/property-inquiry', [InquiryController::class, 'store']);
 Route::get('/agents/{id}', [AgentController::class, 'show']);
 Route::get('/agents/{id}/properties', [AgentController::class, 'properties']);
@@ -87,8 +88,12 @@ Route::post('payment/paypal/create', [PaypalController::class, 'create']);
 Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
+Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
+
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
-Route::get('/home/projects', [HomeController::class, 'projects']);
+// Route::get('/home/projects', [HomeController::class, 'projects']);
+Route::get('home/projects', [HomeController::class, 'projects']);
+
 
 
 
