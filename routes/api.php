@@ -33,6 +33,8 @@ use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\FeaturePropertyController;
 use App\Http\Controllers\API\PaymentApprovalController;
+// use App\Http\Controllers\API\HomeController;
+
 
 // use App\Http\Controllers\API\Admin\InquiryController;
 
@@ -67,6 +69,8 @@ Route::get('/popular-locations', [PopularLocationController::class, 'index']);
 Route::get('/browse-cities', [BrowseCityController::class, 'index']);
 Route::get('/viewed-properties', [ViewedPropertyController::class, 'index']);
 Route::get('/projects/trending', [ProjectController::class, 'trending']);
+Route::get('/home/blogs', [HomeController::class, 'homeBlogs']);
+
 Route::get('/community/blogs', [BlogController::class, 'index']);
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{slug}', [BlogController::class, 'show']);

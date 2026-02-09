@@ -1,32 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
+use App\Models\Blog;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-   public function projects()
-{
-    $projects = \App\Models\Project::where('is_featured', 1)
-        ->with('city:id,name,slug')
-        ->orderBy('created_at', 'desc')
-        ->limit(10)
-        ->get([
-            'id',
-            'title',
-            'slug',
-            'city_id',
-            'location',
-            'developer',
-            'cover_image'
+    public function homeBlogs()
+    {
+        $featured = Blog::orderBy('created_at', 'desc')
+            ->take(4)
+            ->get(['id', 'title', 'slug', 'image']);
+
+        $latest = Blog::orderBy('created_at', 'desc')
+            ->skip(4)
+            ->take(2)
+            ->get(['id', 'title', 'slug', 'image', 'created_at']);
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'featured' => $featured,
+                'latest' => $latest->map(function ($blog) {
+                    return [
+                        'id' => $blog->id,
+                        'title' => $blog->title,
+                        'slug' => $blog->slug,
+                        'image' => $blog->image,
+                        'date' => $blog->created_at->format('d F Y')
+                    ];
+                })
+            ]
         ]);
-
-    return response()->json([
-        'status' => true,
-        'data' => $projects
-    ]);
-}
-
+    }
 }
