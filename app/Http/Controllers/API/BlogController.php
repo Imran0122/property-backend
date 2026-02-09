@@ -7,26 +7,35 @@ use App\Models\Blog;
 
 class BlogController extends Controller
 {
-    // All blogs (listing)
+    // ===============================
+    // BLOG LISTING PAGE
+    // ===============================
     public function index()
     {
         $blogs = Blog::where('status', 'published')
             ->orderBy('created_at', 'desc')
-            ->get([
-                'id',
-                'title',
-                'slug',
-                'image',
-                'created_at'
-            ]);
+            ->get();
 
         return response()->json([
             'status' => true,
-            'data' => $blogs
+            'data' => $blogs->map(function ($blog) {
+                return [
+                    'id' => $blog->id,
+                    'title' => $blog->title,
+                    'slug' => $blog->slug,
+                    'image' => $blog->image,
+                    'description' => $blog->description,
+                    'writer' => $blog->writer,
+                    'reading_time' => $blog->reading_time,
+                    'date' => $blog->created_at->format('d F Y')
+                ];
+            })
         ]);
     }
 
-    // Single blog by slug (DETAIL PAGE)
+    // ===============================
+    // BLOG DETAIL PAGE
+    // ===============================
     public function show($slug)
     {
         $blog = Blog::where('slug', $slug)
@@ -42,7 +51,17 @@ class BlogController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $blog
+            'data' => [
+                'id' => $blog->id,
+                'title' => $blog->title,
+                'slug' => $blog->slug,
+                'image' => $blog->image,
+                'content' => $blog->content,
+                'description' => $blog->description,
+                'writer' => $blog->writer,
+                'reading_time' => $blog->reading_time,
+                'date' => $blog->created_at->format('d F Y')
+            ]
         ]);
     }
 }

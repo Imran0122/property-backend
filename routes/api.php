@@ -33,7 +33,7 @@ use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\FeaturePropertyController;
 use App\Http\Controllers\API\PaymentApprovalController;
-// use App\Http\Controllers\API\HomeController;
+// use App\Http\Controllers\Api\HomeController;
 
 
 // use App\Http\Controllers\API\Admin\InquiryController;
