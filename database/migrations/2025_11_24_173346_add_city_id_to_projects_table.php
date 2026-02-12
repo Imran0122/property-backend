@@ -1,24 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\API;
-
-use App\Http\Controllers\Controller;
-use App\Models\Blog;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class BlogController extends Controller
+return new class extends Migration
 {
-    public function index()
+    public function up(): void
     {
-        $query = Blog::query();
-
-        // Check column before filtering
-        if (Schema::hasColumn('blogs', 'status')) {
-            $query->where('status', 'published');
-        }
-
-        $blogs = $query->latest()->limit(6)->get();
-
-        return response()->json($blogs);
+        Schema::table('projects', function (Blueprint $table) {
+            $table->foreignId('city_id')
+                  ->nullable()
+                  ->constrained()
+                  ->cascadeOnDelete();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('projects', function (Blueprint $table) {
+            $table->dropForeign(['city_id']);
+            $table->dropColumn('city_id');
+        });
+    }
+};

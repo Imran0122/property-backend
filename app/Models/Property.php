@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Property extends Model
 {
@@ -12,17 +13,31 @@ class Property extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'slug',
         'description',
-        'type',                // House / Plot / Commercial (legacy)
-        'location',            // full address
-        'city_id',             // FK -> cities
-        'area',                // area size (string/number)
+
+        'city_id',
+        'area_id',              // location id
+
+        'property_type_id',     // House / Flat / Plot / Commercial
+
+        'area',
+        'area_size',
+        'area_unit',
+
         'bedrooms',
         'bathrooms',
+
         'price',
-        'status',              // available / sold / rented
+
+        'purpose',              // sale / rent
+        'status',               // active / inactive
+
         'is_featured',
-        'property_type_id',    // FK -> property_types
+        'featured_until',
+
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
@@ -39,79 +54,84 @@ class Property extends Model
     // Agent / Owner
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class);
     }
 
     // City
     public function city()
     {
-        return $this->belongsTo(City::class, 'city_id', 'id');
+        return $this->belongsTo(City::class);
     }
 
-    // Type (House / Plot / Commercial category table)
+    // Location (Area)
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'area_id');
+    }
+
+    // Property Type
     public function propertyType()
     {
-        return $this->belongsTo(PropertyType::class, 'property_type_id', 'id');
+        return $this->belongsTo(PropertyType::class);
     }
 
     // Images
     public function images()
     {
-        return $this->hasMany(PropertyImage::class, 'property_id', 'id');
+        return $this->hasMany(PropertyImage::class);
     }
 
-    // Many-to-Many Amenities
+    // Amenities
     public function amenities()
     {
-        return $this->belongsToMany(Amenity::class, 'property_amenity', 'property_id', 'amenity_id');
+        return $this->belongsToMany(
+            Amenity::class,
+            'property_amenity',
+            'property_id',
+            'amenity_id'
+        );
     }
 
-    // Leads / Inquiries
+    // Inquiries
     public function inquiries()
     {
-        return $this->hasMany(Inquiry::class, 'property_id', 'id');
+        return $this->hasMany(PropertyInquiry::class);
     }
 
-    // Favorited by users
+    // Favorites
     public function favoritedBy()
     {
-        return $this->belongsToMany(User::class, 'favorites', 'property_id', 'user_id')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            User::class,
+            'favorites',
+            'property_id',
+            'user_id'
+        )->withTimestamps();
     }
 
-    // Additional Features (area, furnished, etc.)
+    // Extra Features
     public function features()
     {
-        return $this->hasOne(PropertyFeature::class, 'property_id', 'id');
+        return $this->hasOne(PropertyFeature::class);
     }
-    public function favourites()
-{
-    return $this->hasMany(\App\Models\Favourite::class);
-}
 
+ 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Accessors
-    |--------------------------------------------------------------------------
-    */
-
-    // Return a full URL for main image
     public function getMainImageAttribute()
     {
-        $img = $this->images->first();
+        $img = $this->images()->where('is_primary', 1)->first();
+
         if (!$img) return null;
 
-        // if image model already has "url" accessor
-        if (isset($img->url)) return $img->url;
-
-        // fallback
         return asset('storage/' . $img->image_path);
     }
+
+    
+
     protected static function booted()
-{
-    static::creating(function ($property) {
-        $property->slug = \Str::slug($property->title) . '-' . time();
-    });
-}
+    {
+        static::creating(function ($property) {
+            $property->slug = Str::slug($property->title) . '-' . time();
+        });
+    }
 }

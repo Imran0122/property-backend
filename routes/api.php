@@ -33,6 +33,8 @@ use App\Http\Controllers\API\PackageController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\FeaturePropertyController;
 use App\Http\Controllers\API\PaymentApprovalController;
+// use App\Http\Controllers\API\LocationController;
+
 // use App\Http\Controllers\Api\HomeController;
 
 
@@ -97,6 +99,10 @@ Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch'])
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 // Route::get('/home/projects', [HomeController::class, 'projects']);
 Route::get('home/projects', [HomeController::class, 'projects']);
+// Route::get('/popular-locations', [LocationController::class, 'popular']);
+// Route::get('/popular-locations', [LocationController::class, 'popularLocations']);
+
+
 
 
 

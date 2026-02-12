@@ -12,30 +12,32 @@ class PopularLocationController extends Controller
     {
         return response()->json([
             'sale' => [
-                'flats'  => $this->getData('active', 'Flat'),
-                'houses' => $this->getData('active', 'House'),
-                'plots'  => $this->getData('active', 'Plot'),
+                'homes'  => $this->getData('sale', 'Homes'),
+                'plots'  => $this->getData('sale', 'Plots'),
+                'commercial' => $this->getData('sale', 'Commercial'),
             ],
             'rent' => [
-                'flats'  => $this->getData('rented', 'Flat'),
-                'houses' => $this->getData('rented', 'House'),
-                'plots'  => $this->getData('rented', 'Plot'),
+                'homes'  => $this->getData('rent', 'Homes'),
+                'plots'  => $this->getData('rent', 'Plots'),
+                'commercial' => $this->getData('rent', 'Commercial'),
             ],
         ]);
     }
 
-    private function getData($status, $propertyTypeName)
+    private function getData($purpose, $propertyTypeName)
     {
         return Property::select(
                 'cities.name as city',
-                'properties.area',
+                'areas.name as location',
                 DB::raw('COUNT(properties.id) as total')
             )
             ->join('cities', 'cities.id', '=', 'properties.city_id')
+            ->join('areas', 'areas.id', '=', 'properties.area_id')
             ->join('property_types', 'property_types.id', '=', 'properties.property_type_id')
-            ->where('properties.status', $status)
+            ->where('properties.status', 'active')
+            ->where('properties.purpose', $purpose)
             ->where('property_types.name', $propertyTypeName)
-            ->groupBy('cities.name', 'properties.area')
+            ->groupBy('cities.name', 'areas.name')
             ->orderByDesc('total')
             ->limit(8)
             ->get();
