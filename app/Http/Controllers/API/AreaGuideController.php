@@ -29,4 +29,34 @@ class AreaGuideController extends Controller
 
         return response()->json($data);
     }
+
+    public function mostViewed()
+{
+    $cities = \App\Models\City::all();
+    $data = [];
+
+    foreach ($cities as $city) {
+        $areas = \App\Models\Area::where('city_id', $city->id)
+            ->orderBy('views', 'desc')
+            ->take(6)
+            ->get(['name','slug','views']);
+
+        if($areas->count()){
+            $data[$city->name] = $areas;
+        }
+    }
+
+    return response()->json($data);
+}
+
+public function searchCities(Request $request)
+{
+    $search = $request->search;
+
+    $cities = \App\Models\City::where('name','LIKE',"%$search%")
+        ->get(['id','name']);
+
+    return response()->json($cities);
+}
+
 }

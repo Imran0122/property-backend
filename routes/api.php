@@ -104,6 +104,9 @@ Route::get('home/projects', [HomeController::class, 'projects']);
 // Route::get('/popular-locations', [LocationController::class, 'popular']);
 // Route::get('/popular-locations', [LocationController::class, 'popularLocations']);
 Route::get('/area-guides',[AreaGuideController::class,'index']);
+Route::get('/most-viewed-societies', [AreaGuideController::class,'mostViewed']);
+Route::get('/search-cities', [AreaGuideController::class,'searchCities']);
+
 
 
 
