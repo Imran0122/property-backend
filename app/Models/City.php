@@ -18,6 +18,11 @@ class City extends Model
     }
     public function societies(){
     return $this->hasMany(Society::class);
-}
 
+    
+}
+public function areas()
+{
+    return $this->hasMany(Area::class);
+}
 }

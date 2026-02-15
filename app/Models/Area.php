@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,4 +21,13 @@ class Area extends Model
     {
         return $this->hasMany(Property::class);
     }
+
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($area) {
+        $area->slug = Str::slug($area->name);
+    });
+}
 }
