@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
+
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\City;
+use App\Models\Area;
 use App\Models\Society;
 
 class AreaGuideController extends Controller
