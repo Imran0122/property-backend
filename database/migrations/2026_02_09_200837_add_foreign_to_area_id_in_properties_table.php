@@ -13,7 +13,7 @@ return new class extends Migration
 
     $table->foreign('area_id')
           ->references('id')
-          ->on('locations')
+           ->on('areas')
           ->onDelete('cascade');
 });
 }
