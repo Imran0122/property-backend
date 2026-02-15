@@ -34,6 +34,8 @@ use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\FeaturePropertyController;
 use App\Http\Controllers\API\PaymentApprovalController;
 use App\Http\Controllers\API\AreaGuideController;
+use App\Http\Controllers\SocietyController;
+
 
 // use App\Http\Controllers\API\LocationController;
 
@@ -104,8 +106,10 @@ Route::get('home/projects', [HomeController::class, 'projects']);
 // Route::get('/popular-locations', [LocationController::class, 'popular']);
 // Route::get('/popular-locations', [LocationController::class, 'popularLocations']);
 Route::get('/area-guides',[AreaGuideController::class,'index']);
-Route::get('/most-viewed-societies', [AreaGuideController::class,'mostViewed']);
+// Route::get('/most-viewed-societies', [AreaGuideController::class,'mostViewed']);
 Route::get('/search-cities', [AreaGuideController::class,'searchCities']);
+Route::get('/most-viewed-societies', [SocietyController::class, 'mostViewedSocieties']);
+
 
 
 
