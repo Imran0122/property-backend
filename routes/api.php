@@ -37,6 +37,8 @@ use App\Http\Controllers\API\AreaGuideController;
 use App\Http\Controllers\SocietyController;
 use App\Http\Controllers\API\MostViewedSocietyController;
 use App\Http\Controllers\API\SocietyMapController;
+use App\Http\Controllers\API\BankController;
+use App\Http\Controllers\API\HomeLoanController;
 
 
 // use App\Http\Controllers\API\LocationController;
@@ -116,7 +118,8 @@ Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
 Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
-
+Route::get('/banks', [BankController::class, 'index']);
+Route::post('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
 
 
 
