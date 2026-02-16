@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->string('slug')->unique()->after('name');
-    });
-}
+//     public function up()
+// {
+//     Schema::table('areas', function (Blueprint $table) {
+//         $table->string('slug')->unique()->after('name');
+//     });
+// }
 
-public function down()
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->dropColumn('slug');
-    });
-}
+// public function down()
+// {
+//     Schema::table('areas', function (Blueprint $table) {
+//         $table->dropColumn('slug');
+//     });
+// }
 
 };

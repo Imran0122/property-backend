@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  public function up()
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->integer('views')->default(0);
-    });
-}
+//   public function up()
+// {
+//     Schema::table('areas', function (Blueprint $table) {
+//         $table->integer('views')->default(0);
+//     });
+// }
 
-public function down()
-{
-    Schema::table('areas', function (Blueprint $table) {
-        $table->dropColumn('views');
-    });
-}
+// public function down()
+// {
+//     Schema::table('areas', function (Blueprint $table) {
+//         $table->dropColumn('views');
+//     });
+// }
 
 };
