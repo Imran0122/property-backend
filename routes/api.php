@@ -102,7 +102,7 @@ Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
 Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
-Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
+
 // Route::get('/home/projects', [HomeController::class, 'projects']);
 Route::get('home/projects', [HomeController::class, 'projects']);
 // Route::get('/popular-locations', [LocationController::class, 'popular']);
@@ -115,6 +115,7 @@ Route::get('/most-viewed-societies', [MostViewedSocietyController::class, 'index
 Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
 Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
+Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 
 
