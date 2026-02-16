@@ -117,9 +117,10 @@ Route::get('/most-viewed-societies', [MostViewedSocietyController::class, 'index
 Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
 Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
-Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 Route::get('/banks', [BankController::class, 'index']);
 Route::post('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
+Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
+
 
 
 
