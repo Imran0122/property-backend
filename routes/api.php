@@ -36,6 +36,7 @@ use App\Http\Controllers\API\PaymentApprovalController;
 use App\Http\Controllers\API\AreaGuideController;
 use App\Http\Controllers\SocietyController;
 use App\Http\Controllers\API\MostViewedSocietyController;
+use App\Http\Controllers\API\SocietyMapController;
 
 
 // use App\Http\Controllers\API\LocationController;
@@ -111,6 +112,9 @@ Route::get('/area-guides',[AreaGuideController::class,'index']);
 Route::get('/search-cities', [AreaGuideController::class,'searchCities']);
 // Route::get('/most-viewed-societies', [SocietyController::class, 'mostViewedSocieties']);
 Route::get('/most-viewed-societies', [MostViewedSocietyController::class, 'index']);
+Route::get('/society-maps', [SocietyMapController::class, 'index']);
+Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
+Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
 
 
 

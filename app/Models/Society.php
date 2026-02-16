@@ -13,5 +13,8 @@ class Society extends Model
         return $this->belongsTo(City::class);
     }
 
-    
+ public function images()
+{
+    return $this->hasMany(SocietyImage::class, 'society_id');
+}
 }
