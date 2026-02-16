@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\PropertyController;
+
 use App\Http\Controllers\API\CityController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\DashboardController;
@@ -39,7 +39,7 @@ use App\Http\Controllers\API\MostViewedSocietyController;
 use App\Http\Controllers\API\SocietyMapController;
 use App\Http\Controllers\API\BankController;
 use App\Http\Controllers\API\HomeLoanController;
-
+use App\Http\Controllers\API\PropertyController;
 
 // use App\Http\Controllers\API\LocationController;
 
@@ -102,7 +102,7 @@ Route::post('payment/paypal/create', [PaypalController::class, 'create']);
 Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
-Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
+
 
 
 // Route::get('/home/projects', [HomeController::class, 'projects']);
@@ -159,6 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages/conversation/{otherUserId}/{propertyId?}', [MessageController::class, 'conversation']);
     Route::post('/messages/{id}/read', [MessageController::class, 'markAsRead']);
     Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
+    Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/favourites', [FavouriteController::class, 'store']);
