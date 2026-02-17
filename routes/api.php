@@ -59,6 +59,8 @@ use App\Http\Controllers\API\BankController;
 | All API endpoints for the property website (Zameen.com clone)
 |--------------------------------------------------------------------------
 */
+Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
+
 Route::get('/properties/search', [PropertyController::class, 'searchApi']);
 Route::get('/properties/filter', [PropertyController::class, 'filter']);
 Route::get('/projects', [ProjectController::class, 'index']);
