@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\API\PropertyController;
 use App\Http\Controllers\API\CityController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\DashboardController;
@@ -38,8 +38,8 @@ use App\Http\Controllers\SocietyController;
 use App\Http\Controllers\API\MostViewedSocietyController;
 use App\Http\Controllers\API\SocietyMapController;
 use App\Http\Controllers\API\BankController;
-use App\Http\Controllers\API\HomeLoanController;
-use App\Http\Controllers\API\PropertyController;
+
+
 
 // use App\Http\Controllers\API\LocationController;
 
@@ -118,9 +118,7 @@ Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
 Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
 Route::get('/banks', [BankController::class, 'index']);
-Route::post('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
-// Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
-Route::get('/location/{type}/{city}', [PropertyController::class, 'locationSearch']);
+Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 
 
