@@ -9,34 +9,42 @@ use App\Models\City;
 class ToolsController extends Controller
 {
     public function usefulLinks()
-    {
-        $propertyTypes = PropertyType::all();
-        $cities = City::limit(8)->get(); // limit like zameen style
+{
+    $propertyTypes = \App\Models\PropertyType::select('name')
+                        ->distinct()
+                        ->get();
 
-        $data = [];
+    $cities = \App\Models\City::limit(5)->get();
 
-        foreach ($propertyTypes as $type) {
+    $data = [];
 
-            $links = [];
+    foreach ($propertyTypes as $type) {
 
-            foreach ($cities as $city) {
+        $typeSlug = \Illuminate\Support\Str::slug($type->name);
 
-                $links[] = [
-                    'title' => $type->name . ' for Sale in ' . $city->name,
-                    'city' => $city->name,
-                    'url' => '/' . $type->slug . '-for-sale/' . $city->slug
-                ];
-            }
+        $links = [];
 
-            $data[] = [
-                'property_type' => $type->name,
-                'links' => $links
+        foreach ($cities as $city) {
+
+            $citySlug = \Illuminate\Support\Str::slug($city->name);
+
+            $links[] = [
+                'title' => $type->name . ' for Sale in ' . $city->name,
+                'city' => $city->name,
+                'url' => '/' . $typeSlug . '-for-sale/' . $citySlug
             ];
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $data
-        ]);
+        $data[] = [
+            'property_type' => $type->name,
+            'links' => $links
+        ];
     }
+
+    return response()->json([
+        'success' => true,
+        'data' => $data
+    ]);
+}
+
 }
