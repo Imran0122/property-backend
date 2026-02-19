@@ -7,41 +7,33 @@ use Illuminate\Http\Request;
 
 class HomeLoanController extends Controller
 {
-   public function calculate(Request $request)
+  public function calculate(Request $request)
 {
-    // Validate request (important)
-    $request->validate([
-        'property_price' => 'required|numeric|min:1',
-        'down_payment_percentage' => 'required|numeric|min:0',
-        'loan_years' => 'required|numeric|min:1',
-        'interest_rate' => 'required|numeric|min:0',
-    ]);
+    $propertyPrice = (float) $request->query('property_price', 0);
+    $downPaymentPercent = (float) $request->query('down_payment_percentage', 0);
+    $loanYears = (int) $request->query('loan_years', 0);
+    $interestRate = (float) $request->query('interest_rate', 0);
 
-    $price = $request->property_price;
-    $downPercentage = $request->down_payment_percentage;
-    $years = $request->loan_years;
-    $interestRate = $request->interest_rate;
-
-    $downPayment = ($price * $downPercentage) / 100;
-    $loanAmount = $price - $downPayment;
-
-    $monthlyRate = ($interestRate / 100) / 12;
-    $months = $years * 12;
-
-    // Safe EMI calculation
-    if ($monthlyRate == 0) {
-        $emi = $loanAmount / $months;
-    } else {
-        $emi = ($loanAmount * $monthlyRate * pow(1 + $monthlyRate, $months)) 
-              / (pow(1 + $monthlyRate, $months) - 1);
+    if ($propertyPrice <= 0 || $loanYears <= 0 || $interestRate <= 0) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid input values'
+        ], 400);
     }
+
+    $downPaymentAmount = ($propertyPrice * $downPaymentPercent) / 100;
+    $loanAmount = $propertyPrice - $downPaymentAmount;
+    $monthlyRate = $interestRate / 100 / 12;
+    $months = $loanYears * 12;
+
+    $monthlyInstallment = ($loanAmount * $monthlyRate * pow(1 + $monthlyRate, $months)) /
+        (pow(1 + $monthlyRate, $months) - 1);
 
     return response()->json([
         'status' => true,
-        'property_price' => $price,
-        'down_payment' => round($downPayment, 2),
-        'loan_amount' => round($loanAmount, 2),
-        'monthly_emi' => round($emi, 2),
+        'loan_amount' => round($loanAmount),
+        'monthly_installment' => round($monthlyInstallment),
+        'total_payment' => round($monthlyInstallment * $months)
     ]);
 }
 
