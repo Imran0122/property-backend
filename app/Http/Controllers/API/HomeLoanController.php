@@ -7,17 +7,18 @@ use Illuminate\Http\Request;
 
 class HomeLoanController extends Controller
 {
-  public function calculate(Request $request)
+ public function calculate(Request $request)
 {
-    $propertyPrice = (float) $request->query('property_price', 0);
-    $downPaymentPercent = (float) $request->query('down_payment_percentage', 0);
-    $loanYears = (int) $request->query('loan_years', 0);
-    $interestRate = (float) $request->query('interest_rate', 0);
+    $propertyPrice = (float) $request->input('property_price');
+    $downPaymentPercent = (float) $request->input('down_payment_percentage');
+    $loanYears = (int) $request->input('loan_years');
+    $interestRate = (float) $request->input('interest_rate');
 
-    if ($propertyPrice <= 0 || $loanYears <= 0 || $interestRate <= 0) {
+    if (!$propertyPrice || !$loanYears || !$interestRate) {
         return response()->json([
             'status' => false,
-            'message' => 'Invalid input values'
+            'message' => 'Invalid input values',
+            'received_data' => $request->all()
         ], 400);
     }
 
@@ -36,6 +37,7 @@ class HomeLoanController extends Controller
         'total_payment' => round($monthlyInstallment * $months)
     ]);
 }
+
 
 }
 
