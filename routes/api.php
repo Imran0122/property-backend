@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\API\HomeLoanController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PropertyController;
