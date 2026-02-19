@@ -70,26 +70,36 @@ use Illuminate\Http\Request;
 
 class HomeLoanController extends Controller
 {
-    public function calculate(Request $request)
-    {
-        $price = $request->property_price;
-        $downPercentage = $request->down_payment_percentage;
-        $years = $request->loan_years;
-        $interestRate = $request->interest_rate;
+    // public function calculate(Request $request)
+    // {
+    //     $price = $request->property_price;
+    //     $downPercentage = $request->down_payment_percentage;
+    //     $years = $request->loan_years;
+    //     $interestRate = $request->interest_rate;
 
-        $downPayment = ($price * $downPercentage) / 100;
-        $loanAmount = $price - $downPayment;
+    //     $downPayment = ($price * $downPercentage) / 100;
+    //     $loanAmount = $price - $downPayment;
 
-        $monthlyRate = ($interestRate / 100) / 12;
-        $months = $years * 12;
+    //     $monthlyRate = ($interestRate / 100) / 12;
+    //     $months = $years * 12;
 
-        $emi = ($loanAmount * $monthlyRate * pow(1 + $monthlyRate, $months)) 
-              / (pow(1 + $monthlyRate, $months) - 1);
+    //     $emi = ($loanAmount * $monthlyRate * pow(1 + $monthlyRate, $months)) 
+    //           / (pow(1 + $monthlyRate, $months) - 1);
 
-        return response()->json([
-            'status' => true,
-            'loan_amount' => round($loanAmount, 2),
-            'monthly_emi' => round($emi, 2)
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'loan_amount' => round($loanAmount, 2),
+    //         'monthly_emi' => round($emi, 2)
+    //     ]);
+    // }
+
+
+    public function calculate()
+{
+    return response()->json([
+        'status' => true,
+        'message' => 'Home Loan API Working'
+    ]);
+}
+
 }
