@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class PropertyType extends Model
 {
-    use HasFactory;
-
     protected $fillable = ['name'];
 
-    // 🔗 Relationships
+    public function getSlugAttribute()
+    {
+        return Str::slug($this->name);
+    }
+
     public function properties()
     {
         return $this->hasMany(Property::class);

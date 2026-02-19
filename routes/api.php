@@ -39,6 +39,7 @@ use App\Http\Controllers\SocietyController;
 use App\Http\Controllers\API\MostViewedSocietyController;
 use App\Http\Controllers\API\SocietyMapController;
 use App\Http\Controllers\API\BankController;
+use App\Http\Controllers\API\ToolsController;
 
 
 
@@ -105,6 +106,7 @@ Route::post('payment/paypal/create', [PaypalController::class, 'create']);
 Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
+Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
 Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 
