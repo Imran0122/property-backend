@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
 use App\Models\PropertyType;
 use App\Models\City;
 
 class ToolsController extends Controller
 {
-  public function usefulLinks()
+ public function usefulLinks()
 {
     $propertyTypes = PropertyType::all();
-
     $data = [];
 
     foreach ($propertyTypes as $type) {
@@ -20,9 +19,7 @@ class ToolsController extends Controller
             $query->where('property_type_id', $type->id)
                   ->where('purpose', 'sale')
                   ->where('status', 'active');
-        })
-        ->limit(5)
-        ->get();
+        })->limit(5)->get();
 
         if ($cities->isEmpty()) {
             continue;
@@ -31,11 +28,10 @@ class ToolsController extends Controller
         $links = [];
 
         foreach ($cities as $city) {
-
             $links[] = [
                 'title' => $type->name . ' for Sale in ' . $city->name,
-                'city' => $city->name,
-                'url' => '/' . Str::slug($type->name) . '-for-sale/' . Str::slug($city->name)
+                'city'  => $city->name,
+                'url'   => '/' . Str::slug($type->name) . '-for-sale/' . Str::slug($city->name)
             ];
         }
 
