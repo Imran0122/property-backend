@@ -8,30 +8,36 @@ use App\Models\City;
 
 class ToolsController extends Controller
 {
-    public function usefulLinks()
+   public function usefulLinks()
 {
-    $propertyTypes = \App\Models\PropertyType::select('name')
-                        ->distinct()
-                        ->get();
-
-    $cities = \App\Models\City::limit(5)->get();
+    $propertyTypes = \App\Models\PropertyType::with(['properties' => function ($query) {
+        $query->where('purpose', 'sale')
+              ->where('status', 'active');
+    }])->get();
 
     $data = [];
 
     foreach ($propertyTypes as $type) {
 
-        $typeSlug = \Illuminate\Support\Str::slug($type->name);
+        $cities = $type->properties
+            ->pluck('city_id')
+            ->unique()
+            ->take(5);
+
+        if ($cities->isEmpty()) {
+            continue;
+        }
+
+        $cityModels = \App\Models\City::whereIn('id', $cities)->get();
 
         $links = [];
 
-        foreach ($cities as $city) {
-
-            $citySlug = \Illuminate\Support\Str::slug($city->name);
+        foreach ($cityModels as $city) {
 
             $links[] = [
                 'title' => $type->name . ' for Sale in ' . $city->name,
                 'city' => $city->name,
-                'url' => '/' . $typeSlug . '-for-sale/' . $citySlug
+                'url' => '/' . \Str::slug($type->name) . '-for-sale/' . \Str::slug($city->name)
             ];
         }
 
