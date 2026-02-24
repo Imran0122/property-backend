@@ -106,9 +106,9 @@ Route::post('payment/paypal/create', [PaypalController::class, 'create']);
 Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
-Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
+// Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
 // Route::get('/tools/useful-links', [ToolsController::class, 'usefulLinks']);
-Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
+// Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 
 // Route::get('/home/projects', [HomeController::class, 'projects']);
@@ -124,7 +124,16 @@ Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);
 Route::get('/society-maps/{slug}', [SocietyMapController::class, 'show']);
 Route::get('/banks', [BankController::class, 'index']);
-Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
+// Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
+Route::get('/useful-links', [ToolsController::class, 'usefulLinks']);
+
+Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
+
+Route::get('{type}/{city}', [PropertyController::class, 'locationSearch'])
+    ->where([
+        'type' => 'homes-for-sale|homes-for-rent',
+        'city' => '[A-Za-z\-]+'
+    ]);
 
 
 
