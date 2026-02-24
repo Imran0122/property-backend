@@ -106,8 +106,8 @@ Route::post('payment/paypal/create', [PaypalController::class, 'create']);
 Route::get('payment/paypal/success', [PaypalController::class, 'success']);
 Route::get('payment/paypal/cancel', [PaypalController::class, 'cancel']);
 Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
-// Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
-Route::get('/tools/useful-links', [ToolsController::class, 'usefulLinks']);
+Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
+// Route::get('/tools/useful-links', [ToolsController::class, 'usefulLinks']);
 Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 
