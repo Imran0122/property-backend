@@ -40,6 +40,7 @@ use App\Http\Controllers\API\MostViewedSocietyController;
 use App\Http\Controllers\API\SocietyMapController;
 use App\Http\Controllers\API\BankController;
 use App\Http\Controllers\API\ToolsController;
+use App\Http\Controllers\API\AuthController;
 
 
 
@@ -109,6 +110,12 @@ Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
 // Route::get('useful-links', [ToolsController::class, 'usefulLinks']);
 // Route::get('/tools/useful-links', [ToolsController::class, 'usefulLinks']);
 // Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
+
+
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
 // Route::get('/home/projects', [HomeController::class, 'projects']);
