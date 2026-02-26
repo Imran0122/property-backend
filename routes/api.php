@@ -134,6 +134,15 @@ Route::get('/banks', [BankController::class, 'index']);
 // Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 Route::get('/useful-links', [ToolsController::class, 'usefulLinks']);
 
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return response()->json([
+        'success' => true,
+        'user' => $request->user(),
+    ]);
+});
+
+
 Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch'])
