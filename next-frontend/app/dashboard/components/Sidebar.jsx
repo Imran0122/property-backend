@@ -20,11 +20,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const [active, setActive] = useState("Dashboard");
 
   const linkClass = (name) =>
-    `flex items-center gap-3 px-5 py-2.5 rounded-lg text-[15px] font-medium whitespace-nowrap transition-all duration-150 ${
-      active === name
-        ? "bg-green-100 text-green-700"
-        : "text-gray-700 hover:bg-gray-100"
-    }`;
+  `flex items-center gap-3 px-5 py-2.5 rounded-lg text-[15px] font-medium whitespace-nowrap transition-all duration-150 ${
+    active === name
+      ? "bg-green-100 text-green-700"
+      : "text-gray-700 hover:bg-gray-100"
+  }`;
 
   return (
     <aside

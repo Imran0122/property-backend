@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PropertyFeature extends Model
 {
     protected $table = 'property_features'; // your table name
+    protected $guarded = [];
     protected $fillable = [
         'property_id',
         'bedrooms',

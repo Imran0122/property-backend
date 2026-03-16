@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Amenity extends Model
 {
     use HasFactory;
-
+    protected $guarded = [];
     protected $fillable = ['name'];
 
     // 🔗 Relationships

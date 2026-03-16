@@ -45,6 +45,31 @@ class DashboardController extends Controller
 
 
 
+ public function getStats()
+    {
+        // Example of returning static data (Replace with actual logic later)
+        return response()->json([
+            'listings' => [
+                'forSale' => 10,
+                'forRent' => 5,
+                'superHot' => 2,
+                'hot' => 8
+            ],
+            'credits' => [
+                'available' => 20,
+                'used' => 5,
+                'total' => 25
+            ],
+            'analytics' => [
+                'views' => 200,
+                'clicks' => 150,
+                'leads' => 80,
+                'calls' => 40
+            ]
+        ]);
+    }
+
+
     
     public function myProperties(Request $request)
 {

@@ -1,7 +1,8 @@
-import ListingsSection from "./components/ListingsSection";
-import QuotaSection from "./components/QuotaSection";
-import AnalyticsSection from "./components/AnalyticsSection";
-import RecentListings from "./components/RecentListings";
+"use client";
+import ListingsOverview from "./components/ListingsOverview";
+import QuotaCredits from "./components/QuotaCredits";
+import AnalyticsPanel from "./components/AnalyticsPanel";
+import RecentListingsPanel from "./components/RecentListingsPanel";
 
 export default function DashboardPage() {
   return (
@@ -9,15 +10,15 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-7">
-          <ListingsSection />
+          <ListingsOverview />
         </div>
         <div className="col-span-5">
-          <QuotaSection />
+          <QuotaCredits />
         </div>
       </div>
 
-      <AnalyticsSection />
-      <RecentListings />
+      <AnalyticsPanel />
+      <RecentListingsPanel />
 
     </div>
   );

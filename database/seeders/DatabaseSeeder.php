@@ -21,6 +21,11 @@ class DatabaseSeeder extends Seeder
     AreasTableSeeder::class,
     PropertyTypesTableSeeder::class,
     PropertiesTableSeeder::class,
+    nstructionTypeSeeder::class,
+    ConstructionModeSeeder::class,
+    AreaUnitSeeder::class,
+    ConstructionRateSeeder::class,
+    PopularConstructionSizeSeeder::class,
         ]);
     }
 }

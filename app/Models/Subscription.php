@@ -1,6 +1,6 @@
 <?php
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Model;
 class Subscription extends Model
 {
     protected $fillable = ['user_id','package_id','starts_at','ends_at','used_properties','used_featured','status'];

@@ -3,25 +3,35 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Area;
+use Illuminate\Http\Request;
 
 class AreaController extends Controller
 {
     public function getAreasByCity($cityId)
     {
-        $areas = Area::where('city_id', $cityId)->get();
+        $areas = Area::withCount('properties')
+            ->where('city_id', $cityId)
+            ->orderBy('name')
+            ->get(['id', 'city_id', 'name', 'slug', 'views']);
 
         return response()->json([
             'success' => true,
-            'city_id' => $cityId,
+            'city_id' => (int) $cityId,
             'areas' => $areas
         ]);
     }
-    public function index()
-{
-    $areas = Area::all();
-    return response()->json($areas);
-}
 
+    public function index()
+    {
+        $areas = Area::with('city:id,name')
+            ->withCount('properties')
+            ->orderBy('name')
+            ->get(['id', 'city_id', 'name', 'slug', 'views']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $areas
+        ]);
+    }
 }

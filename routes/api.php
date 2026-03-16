@@ -41,9 +41,13 @@ use App\Http\Controllers\API\SocietyMapController;
 use App\Http\Controllers\API\BankController;
 use App\Http\Controllers\API\ToolsController;
 use App\Http\Controllers\API\AuthController;
-
-
-
+use App\Http\Controllers\API\ConstructionCalculatorController;
+use App\Http\Controllers\API\ConstructionController;
+use App\Http\Controllers\API\PropertyImageController;
+use App\Http\Controllers\API\PropertyAmenityController;
+use App\Http\Controllers\API\AmenityController;
+use App\Http\Controllers\API\SettingsController;
+use App\Http\Controllers\API\PropertyBoutiqueController;
 // use App\Http\Controllers\API\LocationController;
 
 // use App\Http\Controllers\Api\HomeController;
@@ -62,6 +66,10 @@ use App\Http\Controllers\API\AuthController;
 | All API endpoints for the property website (Zameen.com clone)
 |--------------------------------------------------------------------------
 */
+
+
+Route::get('/amenities', [AmenityController::class,'index']);
+Route::get('/dashboard-stats', [DashboardController::class, 'getStats']);
 Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
 
 Route::get('/properties/search', [PropertyController::class, 'searchApi']);
@@ -97,10 +105,16 @@ Route::get('/agencies', [AgencyController::class, 'index']);
 // Route::get('/agencies/{id}', [AgencyController::class, 'show']);
 Route::get('/seo/properties', [PropertyController::class, 'seoListing']);
 Route::post('/property-inquiry', [InquiryController::class, 'store']);
-Route::get('/dashboard', [DashboardController::class, 'index']);
+// Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::post('/saved-searches', [SavedSearchController::class, 'store']);
 Route::get('/saved-searches', [SavedSearchController::class, 'index']);
+
+
+
+// Route::post('/properties', [PropertyController::class, 'store']);
 Route::post('/properties', [PropertyController::class, 'store']);
+
+
 Route::get('admin/dashboard', [DashboardController::class, 'index']);
 Route::post('payment/stripe/create-intent', [StripeController::class, 'createIntent']);
 Route::post('payment/paypal/create', [PaypalController::class, 'create']);
@@ -111,11 +125,14 @@ Route::get('property/{slug}', [PropertyController::class, 'showBySlug']);
 // Route::get('/tools/useful-links', [ToolsController::class, 'usefulLinks']);
 // Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
-
+Route::post('/property-amenities', [PropertyAmenityController::class, 'store']);
+Route::get('/property-amenities/{property_id}', [PropertyAmenityController::class, 'show']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+
 
 
 // Route::get('/home/projects', [HomeController::class, 'projects']);
@@ -134,6 +151,20 @@ Route::get('/banks', [BankController::class, 'index']);
 // Route::get('{type}/{city}', [PropertyController::class, 'locationSearch']);
 Route::get('/useful-links', [ToolsController::class, 'usefulLinks']);
 
+Route::post('/property-images', [PropertyImageController::class, 'store']);
+
+
+Route::prefix('construction')->group(function () {
+
+    // Dropdown APIs
+    Route::get('/cities', [ConstructionController::class, 'cities']);
+    Route::get('/types', [ConstructionController::class, 'types']);
+    Route::get('/modes', [ConstructionController::class, 'modes']);
+
+    // Main Calculator API
+    Route::post('/calculate', [ConstructionCalculatorController::class, 'calculate']);
+    // Route::post('/construction/calculate', [ConstructionController::class, 'calculate']);
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json([
@@ -142,12 +173,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     ]);
 });
 
+Route::get('/test', function () {
+    return response()->json([
+        'status' => true,
+        'message' => 'API is working'
+    ]);
+});
 
 Route::get('/home/{type}/{city}', [PropertyController::class, 'locationSearch']);
 
 Route::get('{type}/{city}', [PropertyController::class, 'locationSearch'])
     ->where([
-        'type' => 'homes-for-sale|homes-for-rent',
+        'type' => 'homes-for-sale|homes-for-rent|plots-for-sale|plots-for-rent|commercial-for-sale|commercial-for-rent',
         'city' => '[A-Za-z\-]+'
     ]);
 
@@ -164,7 +201,16 @@ Route::get('{type}/{city}', [PropertyController::class, 'locationSearch'])
 
 
 // ---------------- Public APIs ---------------- //
-Route::get('/properties', [PropertyController::class, 'index']);          // List properties with filters
+Route::get('/properties', [PropertyController::class, 'index']); 
+Route::get('/dashboard/properties',[PropertyController::class,'dashboardProperties']);
+
+Route::get('/dashboard/properties/stats',[PropertyController::class,'dashboardPropertyStats']);  
+       // List properties with filters
+
+
+Route::get('/properties/listing', [PropertyController::class, 'listing']);
+Route::get('/properties/listing/meta', [PropertyController::class, 'listingMeta']);       
+
 Route::get('/properties/{id}', [PropertyController::class, 'show']);      // Show single property detail
 Route::get('/cities', [CityController::class, 'index']);   
 Route::get('/areas', [AreaController::class, 'index']); // ?city_id=1
@@ -172,10 +218,12 @@ Route::get('/areas', [AreaController::class, 'index']); // ?city_id=1
 
 // // ---------------- Protected APIs ---------------- //
 Route::middleware('auth:sanctum')->group(function () {
-    // Dashboard
+
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
     Route::get('/my-properties', [DashboardController::class, 'myProperties']);
 
+});
     // Property CRUD
     Route::post('/properties', [PropertyController::class, 'store']);      // Add property
     Route::put('/properties/{id}', [PropertyController::class, 'update']); // Update property
@@ -226,6 +274,46 @@ Route::prefix('admin')->group(function () {
         \App\Http\Controllers\API\Admin\PropertyApprovalController::class,
         'feature'
     ]);
+});
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Inbox page APIs
+    Route::get('/inbox', [MessageController::class, 'inbox']);
+    Route::get('/inbox/trash', [MessageController::class, 'trash']);
+    Route::get('/inbox/stats', [MessageController::class, 'stats']);
+    Route::patch('/inbox/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::patch('/inbox/{id}/trash', [MessageController::class, 'moveToTrash']);
+    Route::patch('/inbox/{id}/restore', [MessageController::class, 'restore']);
+
+    // Existing messaging system
+    Route::post('/messages/send', [MessageController::class, 'send']);
+    Route::get('/messages/conversations', [MessageController::class, 'conversations']);
+    Route::get('/messages/conversation/{otherUserId}/{propertyId?}', [MessageController::class, 'conversation']);
+    Route::match(['post', 'patch'], '/messages/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/settings', [SettingsController::class, 'getSettings']);
+    Route::post('/settings/profile', [SettingsController::class, 'updateProfile']);
+    Route::post('/settings/preferences', [SettingsController::class, 'updatePreferences']);
+    Route::post('/settings/password', [SettingsController::class, 'changePassword']);
+});
+Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function () {
+    Route::get('/products', [PropertyBoutiqueController::class, 'products']);
+    Route::get('/cart', [PropertyBoutiqueController::class, 'cart']);
+    Route::post('/cart', [PropertyBoutiqueController::class, 'addToCart']);
+    Route::patch('/cart/{id}', [PropertyBoutiqueController::class, 'updateCartItem']);
+    Route::delete('/cart/{id}', [PropertyBoutiqueController::class, 'removeFromCart']);
+    Route::delete('/cart', [PropertyBoutiqueController::class, 'clearCart']);
+
+    Route::post('/checkout', [PropertyBoutiqueController::class, 'checkout']);
+
+    Route::get('/orders', [PropertyBoutiqueController::class, 'orders']);
+    Route::get('/orders/{id}', [PropertyBoutiqueController::class, 'orderShow']);
 });
 
 
@@ -303,7 +391,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('saved-properties', [SavedPropertyController::class, 'index']);
 });
 
-});
+
 
 
 

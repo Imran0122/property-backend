@@ -63,6 +63,7 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
+import { MessageSquareText } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -90,5 +91,17 @@ export default function DashboardLayout({ children }) {
         <main className="p-6 flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
+  );
+}
+
+export function Fab() {
+  return (
+    <button
+      className="fixed bottom-6 left-6 md:left-24 bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-3.5 rounded-full shadow-lg shadow-primary/30 flex items-center gap-2 hover:-translate-y-1 transition-all duration-300 z-50 focus:outline-none focus:ring-4 focus:ring-primary/20"
+      onClick={() => {}}
+    >
+      <MessageSquareText className="w-5 h-5" />
+      Chat
+    </button>
   );
 }

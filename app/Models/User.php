@@ -11,17 +11,43 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
     use HasApiTokens, HasFactory, Notifiable;
-    protected $fillable = [
+    // protected $fillable = [
+    //     'name',
+    //     'email',
+    //     'password',
+    //     'role',      // e.g. agent, admin, buyer
+    //     'is_admin',
+    // ];
+
+protected $fillable = [
         'name',
         'email',
         'password',
-        'role',      // e.g. agent, admin, buyer
+        'mobile',
+        'role',
         'is_admin',
+        'landline',
+        'whatsapp',
+        'city_id',
+        'address',
+        'profile_image',
+        'currency',
+        'area_unit',
+        'email_notifications',
+        'newsletters',
+        'automated_reports'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'email_notifications' => 'boolean',
+        'newsletters' => 'boolean',
+        'automated_reports' => 'boolean',
+        'city_id' => 'integer',
     ];
 
     // 🔗 Relationships
@@ -56,5 +82,15 @@ public function favorites()
         \App\Models\Property::class,
         'favorites'
     )->withTimestamps();
+}
+
+public function boutiqueCartItems()
+{
+    return $this->hasMany(\App\Models\BoutiqueCartItem::class);
+}
+
+public function boutiqueOrders()
+{
+    return $this->hasMany(\App\Models\BoutiqueOrder::class);
 }
 }
