@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Favourite;
-use App\Models\Property;
 use Illuminate\Http\Request;
 
 class FavouriteController extends Controller
@@ -25,7 +24,9 @@ class FavouriteController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Property added to favourites'
+            'message' => $fav->wasRecentlyCreated
+                ? 'Property added to favourites'
+                : 'Property already exists in favourites'
         ]);
     }
 
@@ -49,23 +50,42 @@ class FavouriteController extends Controller
      */
     public function myFavourites()
     {
-        $favourites = Favourite::where('user_id', auth()->id())
-            ->with('property.images')
+        $favourites = Favourite::with([
+                'property.images',
+                'property.city',
+                'property.areaDetail',
+                'property.propertyType',
+            ])
+            ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
         return response()->json([
             'status' => true,
-            'data' => $favourites->map(function ($fav) {
-                $p = $fav->property;
-                return [
-                    'id' => $p->id,
-                    'title' => $p->title,
-                    'price' => $p->price,
-                    'main_image' => $p->images->first()?->url
-                        ?? (isset($p->images[0]) ? asset('storage/'.$p->images[0]->image_path) : null),
-                ];
-            })
+            'data' => $favourites
+                ->filter(fn ($fav) => $fav->property)
+                ->map(function ($fav) {
+                    $p = $fav->property;
+                    $mainImage = optional($p->images->sortByDesc('is_primary')->first())->url;
+
+                    return [
+                        'id' => $p->id,
+                        'slug' => $p->slug,
+                        'title' => $p->title,
+                        'price' => (float) $p->price,
+                        'currency' => 'MAD',
+                        'city' => $p->city?->name,
+                        'area_name' => $p->areaDetail?->name ?: $p->area,
+                        'location_text' => collect([
+                            $p->areaDetail?->name ?: $p->area,
+                            $p->city?->name,
+                        ])->filter()->implode(', '),
+                        'property_type' => $p->propertyType?->name,
+                        'main_image' => $mainImage,
+                        'images_count' => $p->images->count(),
+                    ];
+                })
+                ->values()
         ]);
     }
 }

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Favorite extends Model
+class Favourite extends Model
 {
-    use HasFactory;
+    protected $table = 'favorites';
 
-    protected $fillable = ['user_id', 'property_id'];
+    protected $fillable = [
+        'user_id',
+        'property_id',
+    ];
 
     public function user()
     {

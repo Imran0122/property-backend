@@ -16,7 +16,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Models\AreaUnit;
 class PropertyController extends Controller
 {
     /**
@@ -103,73 +105,188 @@ class PropertyController extends Controller
      * Listing filter meta
      * GET /api/properties/listing/meta
      */
-    public function listingMeta(Request $request): JsonResponse
-    {
-        $baseQuery = Property::query();
+    // public function listingMeta(Request $request): JsonResponse
+    // {
+    //     $baseQuery = Property::query();
 
-        if (Schema::hasColumn('properties', 'status')) {
-            $baseQuery->whereIn('status', ['active', 'published']);
-        }
+    //     if (Schema::hasColumn('properties', 'status')) {
+    //         $baseQuery->whereIn('status', ['active', 'published']);
+    //     }
 
-        if ($request->filled('city_id')) {
-            $baseQuery->where('city_id', $request->city_id);
-        }
+    //     if ($request->filled('city_id')) {
+    //         $baseQuery->where('city_id', $request->city_id);
+    //     }
 
-        if ($request->filled('purpose')) {
-            $baseQuery->where('purpose', $request->purpose);
-        }
+    //     if ($request->filled('purpose')) {
+    //         $baseQuery->where('purpose', $request->purpose);
+    //     }
 
-        $minPrice = (clone $baseQuery)->min('price');
-        $maxPrice = (clone $baseQuery)->max('price');
-        $minArea = (clone $baseQuery)->min('area_size');
-        $maxArea = (clone $baseQuery)->max('area_size');
+    //     $minPrice = (clone $baseQuery)->min('price');
+    //     $maxPrice = (clone $baseQuery)->max('price');
+    //     $minArea = (clone $baseQuery)->min('area_size');
+    //     $maxArea = (clone $baseQuery)->max('area_size');
 
-        $areas = collect();
-        if ($request->filled('city_id')) {
-            $areas = Area::withCount('properties')
-                ->where('city_id', $request->city_id)
-                ->orderBy('name')
-                ->get(['id', 'city_id', 'name', 'slug', 'views']);
-        }
+    //     $areas = collect();
+    //     if ($request->filled('city_id')) {
+    //         $areas = Area::withCount('properties')
+    //             ->where('city_id', $request->city_id)
+    //             ->orderBy('name')
+    //             ->get(['id', 'city_id', 'name', 'slug', 'views']);
+    //     }
 
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'objectives' => [
-                    ['label' => 'Buy', 'value' => 'sale'],
-                    ['label' => 'Rent', 'value' => 'rent'],
-                ],
-                'categories' => [
-                    ['label' => 'Homes', 'value' => 'homes'],
-                    ['label' => 'Plots', 'value' => 'plots'],
-                    ['label' => 'Commercial', 'value' => 'commercial'],
-                ],
-                'cities' => City::orderBy('name')->get(['id', 'name']),
-                'areas' => $areas,
-                'property_types' => PropertyType::orderBy('name')->get(['id', 'name']),
-                'amenities' => Amenity::orderBy('name')->get(['id', 'name', 'category']),
-                'bedroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
-                'bathroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
-                'sort_options' => [
-                    ['label' => 'Newest', 'value' => 'latest'],
-                    ['label' => 'Price: Low to High', 'value' => 'price_asc'],
-                    ['label' => 'Price: High to Low', 'value' => 'price_desc'],
-                    ['label' => 'Area: Large to Small', 'value' => 'area_desc'],
-                    ['label' => 'Oldest', 'value' => 'oldest'],
-                ],
-                'ranges' => [
-                    'price' => [
-                        'min' => $minPrice ? (float) $minPrice : 0,
-                        'max' => $maxPrice ? (float) $maxPrice : 0,
-                    ],
-                    'area' => [
-                        'min' => $minArea ? (float) $minArea : 0,
-                        'max' => $maxArea ? (float) $maxArea : 0,
-                    ],
-                ],
-            ]
-        ]);
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'objectives' => [
+    //                 ['label' => 'Buy', 'value' => 'sale'],
+    //                 ['label' => 'Rent', 'value' => 'rent'],
+    //             ],
+    //             'categories' => [
+    //                 ['label' => 'Homes', 'value' => 'homes'],
+    //                 ['label' => 'Plots', 'value' => 'plots'],
+    //                 ['label' => 'Commercial', 'value' => 'commercial'],
+    //             ],
+    //             'cities' => City::orderBy('name')->get(['id', 'name']),
+    //             'areas' => $areas,
+    //             'property_types' => PropertyType::orderBy('name')->get(['id', 'name']),
+    //             'amenities' => Amenity::orderBy('name')->get(['id', 'name', 'category']),
+    //             'bedroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
+    //             'bathroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
+    //             'sort_options' => [
+    //                 ['label' => 'Newest', 'value' => 'latest'],
+    //                 ['label' => 'Price: Low to High', 'value' => 'price_asc'],
+    //                 ['label' => 'Price: High to Low', 'value' => 'price_desc'],
+    //                 ['label' => 'Area: Large to Small', 'value' => 'area_desc'],
+    //                 ['label' => 'Oldest', 'value' => 'oldest'],
+    //             ],
+    //             'ranges' => [
+    //                 'price' => [
+    //                     'min' => $minPrice ? (float) $minPrice : 0,
+    //                     'max' => $maxPrice ? (float) $maxPrice : 0,
+    //                 ],
+    //                 'area' => [
+    //                     'min' => $minArea ? (float) $minArea : 0,
+    //                     'max' => $maxArea ? (float) $maxArea : 0,
+    //                 ],
+    //             ],
+    //         ]
+    //     ]);
+    // }
+
+
+
+
+
+public function listingMeta(Request $request): JsonResponse
+{
+    $baseQuery = Property::query();
+
+    if (Schema::hasColumn('properties', 'status')) {
+        $baseQuery->whereIn('status', ['active', 'published']);
     }
+
+    if ($request->filled('city_id')) {
+        $baseQuery->where('city_id', $request->city_id);
+    }
+
+    if ($request->filled('purpose')) {
+        $baseQuery->where('purpose', $request->purpose);
+    }
+
+    $minPrice = (clone $baseQuery)->min('price');
+    $maxPrice = (clone $baseQuery)->max('price');
+    $minArea = (clone $baseQuery)->min('area_size');
+    $maxArea = (clone $baseQuery)->max('area_size');
+
+    $areas = collect();
+    if ($request->filled('city_id')) {
+        $areas = Area::withCount(['properties' => function ($q) {
+                $q->whereIn('status', ['active', 'published']);
+            }])
+            ->where('city_id', $request->city_id)
+            ->orderBy('name')
+            ->get(['id', 'city_id', 'name', 'slug', 'views']);
+    }
+
+    $cities = City::orderBy('name')
+        ->get(['id', 'name'])
+        ->unique(function ($city) {
+            return Str::lower(trim($city->name));
+        })
+        ->values();
+
+    $allTypes = PropertyType::orderBy('name')
+        ->get(['id', 'name'])
+        ->unique(function ($type) {
+            return Str::lower(trim($type->name));
+        })
+        ->values();
+
+    $childTypes = $allTypes->reject(function ($type) {
+        return in_array(Str::lower(trim($type->name)), ['homes', 'plots', 'commercial'], true);
+    })->values();
+
+    $propertyTypeGroups = [
+        'homes' => $childTypes
+            ->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'homes')
+            ->values(),
+        'plots' => $childTypes
+            ->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'plots')
+            ->values(),
+        'commercial' => $childTypes
+            ->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'commercial')
+            ->values(),
+    ];
+
+    return response()->json([
+        'status' => true,
+        'data' => [
+            'objectives' => [
+                ['label' => 'Buy', 'value' => 'sale'],
+                ['label' => 'Rent', 'value' => 'rent'],
+            ],
+            'categories' => [
+                ['label' => 'Homes', 'value' => 'homes'],
+                ['label' => 'Plots', 'value' => 'plots'],
+                ['label' => 'Commercial', 'value' => 'commercial'],
+            ],
+            'cities' => $cities,
+            'areas' => $areas,
+            'property_types' => $allTypes,
+            'property_type_groups' => $propertyTypeGroups,
+            'amenities' => Amenity::orderBy('name')->get(['id', 'name', 'category']),
+            'area_units' => AreaUnit::orderBy('name')->get(['id', 'name', 'slug', 'conversion_to_sqft']),
+            'bedroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
+            'bathroom_options' => [1, 2, 3, 4, 5, 6, 7, 8, 10],
+            'sort_options' => [
+                ['label' => 'Newest', 'value' => 'latest'],
+                ['label' => 'Price: Low to High', 'value' => 'price_asc'],
+                ['label' => 'Price: High to Low', 'value' => 'price_desc'],
+                ['label' => 'Area: Large to Small', 'value' => 'area_desc'],
+                ['label' => 'Oldest', 'value' => 'oldest'],
+            ],
+            'more_filter_options' => [
+                'with_photos' => true,
+                'agency_type' => ['agent', 'individual'],
+                'posted_within' => ['today', '3', '7', '14'],
+            ],
+            'ranges' => [
+                'price' => [
+                    'min' => $minPrice ? (float) $minPrice : 0,
+                    'max' => $maxPrice ? (float) $maxPrice : 0,
+                ],
+                'area' => [
+                    'min' => $minArea ? (float) $minArea : 0,
+                    'max' => $maxArea ? (float) $maxArea : 0,
+                ],
+            ],
+        ]
+    ]);
+}
+
+
+
+
 
     /**
      * SEO listing route
@@ -279,219 +396,516 @@ class PropertyController extends Controller
     /**
      * Existing dashboard methods
      */
-    public function dashboardPropertyStats()
-    {
-        return response()->json([
-            'status' => true,
-            'stats' => [
-                'active' => Property::where('status', 'active')->count(),
-                'pending' => Property::where('status', 'pending')->count(),
-                'rejected' => Property::where('status', 'rejected')->count(),
-                'expired' => Property::where('status', 'expired')->count(),
-                'deleted' => Property::where('status', 'deleted')->count(),
-                'downgraded' => Property::where('status', 'downgraded')->count(),
-                'inactive' => Property::where('status', 'inactive')->count(),
-            ]
-        ]);
+   public function dashboardPropertyStats(Request $request)
+{
+    $userId = $request->user()->id;
+
+    $baseQuery = Property::where('user_id', $userId);
+
+    return response()->json([
+        'status' => true,
+        'stats' => [
+            'active' => (clone $baseQuery)->where('status', 'active')->count(),
+            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
+            'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
+            'expired' => (clone $baseQuery)->where('status', 'expired')->count(),
+            'deleted' => (clone $baseQuery)->where('status', 'deleted')->count(),
+            'downgraded' => (clone $baseQuery)->where('status', 'downgraded')->count(),
+            'inactive' => (clone $baseQuery)->where('status', 'inactive')->count(),
+        ]
+    ]);
+}
+
+   public function dashboardProperties(Request $request)
+{
+    $userId = $request->user()->id;
+
+    $query = Property::where('user_id', $userId)
+        ->with(['city', 'propertyType', 'images']);
+
+    if ($request->filled('listing_id')) {
+        $query->where('id', $request->listing_id);
     }
 
-    public function dashboardProperties(Request $request)
-    {
-        $query = Property::with(['city', 'propertyType', 'images']);
-
-        if ($request->filled('listing_id')) {
-            $query->where('id', $request->listing_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', strtolower($request->status));
-        }
-
-        if ($request->filled('property_type_id')) {
-            $query->where('property_type_id', $request->property_type_id);
-        }
-
-        if ($request->filled('purpose')) {
-            $query->where('purpose', $request->purpose);
-        }
-
-        if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
-        }
-
-        if ($request->category === 'hot') {
-            $query->where('is_hot', 1);
-        }
-
-        if ($request->category === 'super_hot') {
-            $query->where('is_super_hot', 1);
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        if ($request->filled('min_area')) {
-            $query->where('area_size', '>=', $request->min_area);
-        }
-
-        if ($request->filled('max_area')) {
-            $query->where('area_size', '<=', $request->max_area);
-        }
-
-        $properties = $query->latest()->paginate(10);
-
-        $data = $properties->getCollection()->map(function ($p) {
-            $mainImage = optional($p->images->sortByDesc('is_primary')->first())->url;
-
-            return [
-                'id' => $p->id,
-                'title' => $p->title,
-                'price' => $p->price,
-                'city' => $p->city?->name,
-                'area' => trim(($p->area_size ?? '') . ' ' . ($p->area_unit ?? '')),
-                'purpose' => $p->purpose,
-                'status' => $p->status,
-                'platform' => 'Hectare',
-                'posted_on' => optional($p->created_at)->format('Y-m-d'),
-                'main_image' => $mainImage,
-            ];
-        });
-
-        return response()->json([
-            'status' => true,
-            'data' => $data,
-            'meta' => [
-                'total' => $properties->total(),
-                'current_page' => $properties->currentPage(),
-                'last_page' => $properties->lastPage()
-            ]
-        ]);
+    if ($request->filled('status')) {
+        $query->where('status', strtolower($request->status));
     }
+
+    if ($request->filled('property_type_id')) {
+        $query->where('property_type_id', $request->property_type_id);
+    }
+
+    if ($request->filled('purpose')) {
+        $query->where('purpose', $request->purpose);
+    }
+
+    if ($request->filled('city_id')) {
+        $query->where('city_id', $request->city_id);
+    }
+
+    if ($request->category === 'hot') {
+        $query->where('is_hot', 1);
+    }
+
+    if ($request->category === 'super_hot') {
+        $query->where('is_super_hot', 1);
+    }
+
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    if ($request->filled('min_area')) {
+        $query->where('area_size', '>=', $request->min_area);
+    }
+
+    if ($request->filled('max_area')) {
+        $query->where('area_size', '<=', $request->max_area);
+    }
+
+    $properties = $query->latest()->paginate(10);
+
+    $data = $properties->getCollection()->map(function ($p) {
+        $mainImage = optional($p->images->sortByDesc('is_primary')->first())->url;
+
+        return [
+            'id' => $p->id,
+            'title' => $p->title,
+            'price' => $p->price,
+            'city' => $p->city?->name,
+            'area' => trim(($p->area_size ?? '') . ' ' . ($p->area_unit ?? '')),
+            'purpose' => $p->purpose,
+            'status' => $p->status,
+            'platform' => 'Wallet',
+            'posted_on' => optional($p->created_at)->format('Y-m-d'),
+            'main_image' => $mainImage,
+            'property_type' => $p->propertyType?->name,
+            'bedrooms' => $p->bedrooms,
+            'bathrooms' => $p->bathrooms,
+            'views' => 0,
+            'leads' => 0,
+            'is_featured' => (bool) $p->is_featured,
+            'is_hot' => (bool) $p->is_hot,
+            'is_super_hot' => (bool) $p->is_super_hot,
+        ];
+    });
+
+    return response()->json([
+        'status' => true,
+        'data' => $data,
+        'meta' => [
+            'total' => $properties->total(),
+            'current_page' => $properties->currentPage(),
+            'last_page' => $properties->lastPage(),
+            'per_page' => $properties->perPage(),
+        ]
+    ]);
+}
+
+
+public function dashboardPostListingMeta(Request $request): JsonResponse
+{
+    $user = $request->user();
+    $types = PropertyType::orderBy('name')->get(['id', 'name']);
+
+    return response()->json([
+        'status' => true,
+        'data' => [
+            'purposes' => [
+                ['label' => 'Sell', 'value' => 'sale'],
+                ['label' => 'Rent', 'value' => 'rent'],
+            ],
+            'categories' => [
+                ['label' => 'Home', 'value' => 'homes'],
+                ['label' => 'Plots', 'value' => 'plots'],
+                ['label' => 'Commercial', 'value' => 'commercial'],
+            ],
+            'property_types' => $types,
+            'property_type_groups' => [
+                'homes' => $types->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'homes')->values(),
+                'plots' => $types->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'plots')->values(),
+                'commercial' => $types->filter(fn ($type) => $this->resolveTypeGroup($type->name) === 'commercial')->values(),
+            ],
+            'cities' => City::orderBy('name')->get(['id', 'name']),
+            'area_units' => ['sqft', 'sqm', 'marla', 'kanal'],
+            'bedroom_options' => ['studio', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'],
+            'bathroom_options' => [1, 2, 3, 4, 5, 6, '6+'],
+            'platforms' => [
+                ['label' => 'Wallet', 'value' => 'wallet']
+            ],
+            'contact' => [
+                'email' => $user?->email,
+                'mobile' => $user?->mobile,
+                'landline' => $user?->landline,
+            ],
+            'feature_tabs' => [
+                ['key' => 'main_features', 'label' => 'Main Features'],
+                ['key' => 'rooms', 'label' => 'Rooms'],
+                ['key' => 'business_and_communication', 'label' => 'Business and Communication'],
+                ['key' => 'community_features', 'label' => 'Community Features'],
+                ['key' => 'healthcare_recreational', 'label' => 'Healthcare Recreational'],
+                ['key' => 'nearby', 'label' => 'Nearby Locations and Other Facilities'],
+                ['key' => 'other_facilities', 'label' => 'Other Facilities'],
+            ],
+        ]
+    ]);
+}
+
+public function dashboardPostListingShow(Request $request, int $id): JsonResponse
+{
+    $property = Property::with([
+        'city',
+        'areaDetail',
+        'propertyType',
+        'features',
+        'amenities',
+        'images',
+        'user',
+    ])
+    ->where('user_id', $request->user()->id)
+    ->find($id);
+
+    if (!$property) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Property not found'
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => true,
+        'data' => [
+            'property' => [
+                'id' => $property->id,
+                'title' => $property->title,
+                'description' => $property->description,
+                'city_id' => $property->city_id,
+                'area_id' => $property->area_id,
+                'area' => $property->area,
+                'price' => $property->price,
+                'property_type_id' => $property->property_type_id,
+                'category' => $this->resolveTypeGroup($property->propertyType?->name ?? ''),
+                'purpose' => $property->purpose,
+                'bedrooms' => $property->bedrooms,
+                'bathrooms' => $property->bathrooms,
+                'area_size' => $property->area_size,
+                'area_unit' => $property->area_unit,
+                'latitude' => $property->latitude,
+                'longitude' => $property->longitude,
+                'status' => $property->status,
+            ],
+            'features' => $property->features,
+            'amenity_ids' => $property->amenities->pluck('id')->values(),
+            'images' => $property->images
+                ->sortByDesc('is_primary')
+                ->values()
+                ->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'url' => $image->url,
+                        'is_primary' => (bool) $image->is_primary,
+                    ];
+                }),
+            'contact' => [
+                'email' => $property->user?->email,
+                'mobile' => $property->user?->mobile,
+                'landline' => $property->user?->landline,
+            ],
+            'platform' => [
+                'label' => 'Wallet',
+                'value' => 'wallet'
+            ]
+        ]
+    ]);
+}
+
 
     /**
      * Existing create API
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'city_id' => 'required|exists:cities,id',
-            'area_id' => 'nullable|exists:areas,id',
-            'area' => 'nullable|string|max:255',
-            'price' => 'required|numeric',
-            'property_type_id' => 'required|exists:property_types,id',
-            'purpose' => 'required|in:sale,rent',
-            'bedrooms' => 'nullable|integer',
-            'bathrooms' => 'nullable|integer',
-            'area_size' => 'nullable|numeric',
-            'area_unit' => 'nullable|string|max:50',
-            'latitude' => 'nullable',
-            'longitude' => 'nullable',
-            'amenities' => 'array',
-            'amenities.*' => 'exists:amenities,id',
-            'images.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'city_id' => 'required|exists:cities,id',
+    //         'area_id' => 'nullable|exists:areas,id',
+    //         'area' => 'nullable|string|max:255',
+    //         'price' => 'required|numeric',
+    //         'property_type_id' => 'required|exists:property_types,id',
+    //         'purpose' => 'required|in:sale,rent',
+    //         'bedrooms' => 'nullable|integer',
+    //         'bathrooms' => 'nullable|integer',
+    //         'area_size' => 'nullable|numeric',
+    //         'area_unit' => 'nullable|string|max:50',
+    //         'latitude' => 'nullable',
+    //         'longitude' => 'nullable',
+    //         'amenities' => 'array',
+    //         'amenities.*' => 'exists:amenities,id',
+    //         'images.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+    //     ]);
+
+    //     $data['user_id'] = $request->user()->id;
+    //     $data['slug'] = Str::slug($data['title']) . '-' . time();
+    //     $data['status'] = 'pending';
+
+    //     $property = Property::create($data);
+
+    //     if ($request->has('amenities')) {
+    //         foreach ($request->amenities as $amenity) {
+    //             PropertyAmenity::create([
+    //                 'property_id' => $property->id,
+    //                 'amenity_id' => $amenity
+    //             ]);
+    //         }
+    //     }
+
+    //     PropertyFeature::create([
+    //         'property_id' => $property->id,
+    //         'bedrooms' => $request->bedrooms,
+    //         'bathrooms' => $request->bathrooms,
+    //         'area' => $request->area_size,
+    //         'area_unit' => $request->area_unit,
+    //         'furnished' => $request->furnished ?? 0,
+    //         'built_year' => $request->built_year ?? null,
+    //         'flooring' => $request->flooring ?? null,
+    //         'parking_spaces' => $request->parking_spaces ?? null,
+    //         'electricity_backup' => $request->electricity_backup ?? 0,
+    //         'central_ac' => $request->central_ac ?? 0,
+    //         'central_heating' => $request->central_heating ?? 0,
+    //         'double_glazed_windows' => $request->double_glazed_windows ?? 0,
+    //         'kitchens' => $request->kitchens ?? null,
+    //         'drawing_room' => $request->drawing_room ?? 0,
+    //         'study_room' => $request->study_room ?? 0,
+    //         'store_room' => $request->store_room ?? 0,
+    //         'servant_quarter' => $request->servant_quarter ?? 0,
+    //         'prayer_room' => $request->prayer_room ?? 0,
+    //         'dining_room' => $request->dining_room ?? 0,
+    //         'nearby_schools' => $request->nearby_schools ?? 0,
+    //         'nearby_hospitals' => $request->nearby_hospitals ?? 0,
+    //         'nearby_restaurants' => $request->nearby_restaurants ?? 0,
+    //         'nearby_shopping_malls' => $request->nearby_shopping_malls ?? 0,
+    //         'distance_from_airport' => $request->distance_from_airport ?? null,
+    //         'nearby_public_transport' => $request->nearby_public_transport ?? 0,
+    //     ]);
+
+    //     if ($request->hasFile('images')) {
+    //         foreach ($request->file('images') as $key => $image) {
+    //             $path = $image->store('properties', 'public');
+
+    //             PropertyImage::create([
+    //                 'property_id' => $property->id,
+    //                 'image_path' => $path,
+    //                 'is_primary' => $key === 0 ? 1 : 0
+    //             ]);
+    //         }
+    //     }
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Property added successfully',
+    //         'data' => $property
+    //     ]);
+    // }
+
+
+
+public function store(Request $request)
+{
+    $validated = $request->validate($this->postListingRules($request));
+
+    $user = $request->user();
+
+    $property = DB::transaction(function () use ($request, $validated, $user) {
+
+        $property = Property::create([
+            'user_id' => $user->id,
+            'title' => $validated['title'],
+            'slug' => Str::slug($validated['title']) . '-' . time(),
+            'description' => $validated['description'],
+            'city_id' => $validated['city_id'],
+            'area_id' => $validated['area_id'] ?? null,
+            'area' => $validated['area'] ?? null,
+            'price' => $validated['price'],
+            'property_type_id' => $validated['property_type_id'],
+            'purpose' => $validated['purpose'],
+            'bedrooms' => $this->normalizeCountValue($request->bedrooms),
+            'bathrooms' => $this->normalizeCountValue($request->bathrooms),
+            'area_size' => $validated['area_size'] ?? null,
+            'area_unit' => $validated['area_unit'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'status' => 'pending',
         ]);
 
-        $data['user_id'] = $request->user()->id;
-        $data['slug'] = Str::slug($data['title']) . '-' . time();
-        $data['status'] = 'pending';
+        $property->features()->updateOrCreate(
+            ['property_id' => $property->id],
+            $this->buildFeaturePayload($request)
+        );
 
-        $property = Property::create($data);
-
-        if ($request->has('amenities')) {
-            foreach ($request->amenities as $amenity) {
-                PropertyAmenity::create([
-                    'property_id' => $property->id,
-                    'amenity_id' => $amenity
-                ]);
-            }
+        if ($request->filled('amenities')) {
+            $property->amenities()->sync($request->amenities);
         }
 
-        PropertyFeature::create([
-            'property_id' => $property->id,
-            'bedrooms' => $request->bedrooms,
-            'bathrooms' => $request->bathrooms,
-            'area' => $request->area_size,
-            'area_unit' => $request->area_unit,
-            'furnished' => $request->furnished ?? 0,
-            'built_year' => $request->built_year ?? null,
-            'flooring' => $request->flooring ?? null,
-            'parking_spaces' => $request->parking_spaces ?? null,
-            'electricity_backup' => $request->electricity_backup ?? 0,
-            'central_ac' => $request->central_ac ?? 0,
-            'central_heating' => $request->central_heating ?? 0,
-            'double_glazed_windows' => $request->double_glazed_windows ?? 0,
-            'kitchens' => $request->kitchens ?? null,
-            'drawing_room' => $request->drawing_room ?? 0,
-            'study_room' => $request->study_room ?? 0,
-            'store_room' => $request->store_room ?? 0,
-            'servant_quarter' => $request->servant_quarter ?? 0,
-            'prayer_room' => $request->prayer_room ?? 0,
-            'dining_room' => $request->dining_room ?? 0,
-            'nearby_schools' => $request->nearby_schools ?? 0,
-            'nearby_hospitals' => $request->nearby_hospitals ?? 0,
-            'nearby_restaurants' => $request->nearby_restaurants ?? 0,
-            'nearby_shopping_malls' => $request->nearby_shopping_malls ?? 0,
-            'distance_from_airport' => $request->distance_from_airport ?? null,
-            'nearby_public_transport' => $request->nearby_public_transport ?? 0,
-        ]);
-
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $key => $image) {
+            foreach ($request->file('images') as $index => $image) {
                 $path = $image->store('properties', 'public');
 
                 PropertyImage::create([
                     'property_id' => $property->id,
                     'image_path' => $path,
-                    'is_primary' => $key === 0 ? 1 : 0
+                    'is_primary' => $index === 0 ? 1 : 0,
                 ]);
             }
         }
 
+        $this->updateUserContactFromListingForm($user, $request);
+
+        return $property->load(['features', 'amenities', 'images']);
+    });
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Property added successfully',
+        'data' => $property
+    ]);
+}
+
+
+
+
+
+
+    // public function update(Request $request, $id)
+    // {
+    //     $property = Property::where('id', $id)
+    //         ->where('user_id', $request->user()->id)
+    //         ->first();
+
+    //     if (!$property) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Property not found'
+    //         ], 404);
+    //     }
+
+    //     $data = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'price' => 'required|numeric',
+    //         'bedrooms' => 'nullable|integer',
+    //         'bathrooms' => 'nullable|integer',
+    //         'area_size' => 'nullable|numeric',
+    //         'area_unit' => 'nullable|string'
+    //     ]);
+
+    //     $property->update($data);
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Property updated successfully',
+    //         'data' => $property
+    //     ]);
+    // }
+
+
+
+public function update(Request $request, $id)
+{
+    $property = Property::where('id', $id)
+        ->where('user_id', $request->user()->id)
+        ->with(['images', 'features', 'amenities'])
+        ->first();
+
+    if (!$property) {
         return response()->json([
-            'status' => true,
-            'message' => 'Property added successfully',
-            'data' => $property
-        ]);
+            'status' => false,
+            'message' => 'Property not found'
+        ], 404);
     }
 
-    public function update(Request $request, $id)
-    {
-        $property = Property::where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
+    $validated = $request->validate($this->postListingRules($request));
 
-        if (!$property) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Property not found'
-            ], 404);
+    $property = DB::transaction(function () use ($request, $validated, $property) {
+
+        $property->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'city_id' => $validated['city_id'],
+            'area_id' => $validated['area_id'] ?? null,
+            'area' => $validated['area'] ?? null,
+            'price' => $validated['price'],
+            'property_type_id' => $validated['property_type_id'],
+            'purpose' => $validated['purpose'],
+            'bedrooms' => $this->normalizeCountValue($request->bedrooms),
+            'bathrooms' => $this->normalizeCountValue($request->bathrooms),
+            'area_size' => $validated['area_size'] ?? null,
+            'area_unit' => $validated['area_unit'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+        ]);
+
+        $property->features()->updateOrCreate(
+            ['property_id' => $property->id],
+            $this->buildFeaturePayload($request)
+        );
+
+        $property->amenities()->sync($request->input('amenities', []));
+
+        if ($request->filled('delete_image_ids')) {
+            $imagesToDelete = $property->images()
+                ->whereIn('id', $request->delete_image_ids)
+                ->get();
+
+            foreach ($imagesToDelete as $image) {
+                Storage::disk('public')->delete($image->image_path);
+                $image->delete();
+            }
         }
 
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'bedrooms' => 'nullable|integer',
-            'bathrooms' => 'nullable|integer',
-            'area_size' => 'nullable|numeric',
-            'area_unit' => 'nullable|string'
-        ]);
+        if ($request->hasFile('images')) {
+            $hasPrimary = $property->images()->where('is_primary', 1)->exists();
 
-        $property->update($data);
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('properties', 'public');
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Property updated successfully',
-            'data' => $property
-        ]);
-    }
+                PropertyImage::create([
+                    'property_id' => $property->id,
+                    'image_path' => $path,
+                    'is_primary' => (!$hasPrimary && $index === 0) ? 1 : 0,
+                ]);
+            }
+        }
+
+        if (!$property->images()->where('is_primary', 1)->exists()) {
+            $firstImage = $property->images()->first();
+            if ($firstImage) {
+                $firstImage->update(['is_primary' => 1]);
+            }
+        }
+
+        $this->updateUserContactFromListingForm($request->user(), $request);
+
+        return $property->load(['features', 'amenities', 'images']);
+    });
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Property updated successfully',
+        'data' => $property
+    ]);
+}
+
+
+
+
+
+
+
 
     public function destroy(Request $request, $id)
     {
@@ -617,155 +1031,355 @@ class PropertyController extends Controller
      * Helpers
      * ===========================
      */
-    private function buildListingQuery(Request $request, bool $applySorting = true): Builder
-    {
-        $query = Property::query()->with([
-            'city',
-            'areaDetail',
-            'propertyType',
-            'images',
-            'features',
-            'amenities',
-            'user',
-            'user.agency',
-        ]);
+    // private function buildListingQuery(Request $request, bool $applySorting = true): Builder
+    // {
+    //     $query = Property::query()->with([
+    //         'city',
+    //         'areaDetail',
+    //         'propertyType',
+    //         'images',
+    //         'features',
+    //         'amenities',
+    //         'user',
+    //         'user.agency',
+    //     ]);
 
-        if (Schema::hasColumn('properties', 'status')) {
-            $query->whereIn('status', ['active', 'published']);
-        }
+    //     if (Schema::hasColumn('properties', 'status')) {
+    //         $query->whereIn('status', ['active', 'published']);
+    //     }
 
-        if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
-        }
+    //     if ($request->filled('city_id')) {
+    //         $query->where('city_id', $request->city_id);
+    //     }
 
-        if ($request->filled('area_id')) {
-            $query->where('area_id', $request->area_id);
-        } elseif ($request->filled('area')) {
-            $area = $request->area;
-            $query->where(function ($q) use ($area) {
-                $q->where('area', 'like', '%' . $area . '%')
-                    ->orWhereHas('areaDetail', function ($q2) use ($area) {
-                        $q2->where('name', 'like', '%' . $area . '%');
-                    });
-            });
-        }
+    //     if ($request->filled('area_id')) {
+    //         $query->where('area_id', $request->area_id);
+    //     } elseif ($request->filled('area')) {
+    //         $area = $request->area;
+    //         $query->where(function ($q) use ($area) {
+    //             $q->where('area', 'like', '%' . $area . '%')
+    //                 ->orWhereHas('areaDetail', function ($q2) use ($area) {
+    //                     $q2->where('name', 'like', '%' . $area . '%');
+    //                 });
+    //         });
+    //     }
 
-        if ($request->filled('property_type_id')) {
-            $query->where('property_type_id', $request->property_type_id);
-        }
+    //     if ($request->filled('property_type_id')) {
+    //         $query->where('property_type_id', $request->property_type_id);
+    //     }
 
-        if ($request->filled('purpose')) {
-            $query->where('purpose', $request->purpose);
-        }
+    //     if ($request->filled('purpose')) {
+    //         $query->where('purpose', $request->purpose);
+    //     }
 
-        if ($request->filled('category')) {
-            $this->applyCategoryFilter($query, $request->category);
-        }
+    //     if ($request->filled('category')) {
+    //         $this->applyCategoryFilter($query, $request->category);
+    //     }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
+    //     if ($request->filled('min_price')) {
+    //         $query->where('price', '>=', $request->min_price);
+    //     }
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
+    //     if ($request->filled('max_price')) {
+    //         $query->where('price', '<=', $request->max_price);
+    //     }
 
-        $minArea = $request->get('min_area', $request->get('area_min'));
-        $maxArea = $request->get('max_area', $request->get('area_max'));
+    //     $minArea = $request->get('min_area', $request->get('area_min'));
+    //     $maxArea = $request->get('max_area', $request->get('area_max'));
 
-        if (!is_null($minArea) && $minArea !== '') {
-            $query->where('area_size', '>=', $minArea);
-        }
+    //     if (!is_null($minArea) && $minArea !== '') {
+    //         $query->where('area_size', '>=', $minArea);
+    //     }
 
-        if (!is_null($maxArea) && $maxArea !== '') {
-            $query->where('area_size', '<=', $maxArea);
-        }
+    //     if (!is_null($maxArea) && $maxArea !== '') {
+    //         $query->where('area_size', '<=', $maxArea);
+    //     }
 
-        if ($request->filled('bedrooms')) {
-            $query->where('bedrooms', '>=', (int) $request->bedrooms);
-        }
+    //     if ($request->filled('bedrooms')) {
+    //         $query->where('bedrooms', '>=', (int) $request->bedrooms);
+    //     }
 
-        if ($request->filled('bathrooms')) {
-            $query->where('bathrooms', '>=', (int) $request->bathrooms);
-        }
+    //     if ($request->filled('bathrooms')) {
+    //         $query->where('bathrooms', '>=', (int) $request->bathrooms);
+    //     }
 
-        if ($request->boolean('is_featured')) {
-            $query->where('is_featured', 1);
-        }
+    //     if ($request->boolean('is_featured')) {
+    //         $query->where('is_featured', 1);
+    //     }
 
-        if ($request->boolean('is_hot')) {
-            $query->where('is_hot', 1);
-        }
+    //     if ($request->boolean('is_hot')) {
+    //         $query->where('is_hot', 1);
+    //     }
 
-        if ($request->boolean('is_super_hot')) {
-            $query->where('is_super_hot', 1);
-        }
+    //     if ($request->boolean('is_super_hot')) {
+    //         $query->where('is_super_hot', 1);
+    //     }
 
-        if ($request->filled('amenity_ids')) {
-            $amenityIds = array_filter(explode(',', (string) $request->amenity_ids));
-            if (!empty($amenityIds)) {
-                $query->whereHas('amenities', function ($q) use ($amenityIds) {
-                    $q->whereIn('amenities.id', $amenityIds);
-                });
-            }
-        }
+    //     if ($request->filled('amenity_ids')) {
+    //         $amenityIds = array_filter(explode(',', (string) $request->amenity_ids));
+    //         if (!empty($amenityIds)) {
+    //             $query->whereHas('amenities', function ($q) use ($amenityIds) {
+    //                 $q->whereIn('amenities.id', $amenityIds);
+    //             });
+    //         }
+    //     }
 
-        if ($request->filled('keyword')) {
-            $keyword = trim((string) $request->keyword);
+    //     if ($request->filled('keyword')) {
+    //         $keyword = trim((string) $request->keyword);
 
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', '%' . $keyword . '%')
-                    ->orWhere('description', 'like', '%' . $keyword . '%')
-                    ->orWhere('area', 'like', '%' . $keyword . '%')
-                    ->orWhereHas('city', function ($q2) use ($keyword) {
-                        $q2->where('name', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhereHas('areaDetail', function ($q2) use ($keyword) {
-                        $q2->where('name', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhereHas('propertyType', function ($q2) use ($keyword) {
-                        $q2->where('name', 'like', '%' . $keyword . '%');
-                    });
-            });
-        }
+    //         $query->where(function ($q) use ($keyword) {
+    //             $q->where('title', 'like', '%' . $keyword . '%')
+    //                 ->orWhere('description', 'like', '%' . $keyword . '%')
+    //                 ->orWhere('area', 'like', '%' . $keyword . '%')
+    //                 ->orWhereHas('city', function ($q2) use ($keyword) {
+    //                     $q2->where('name', 'like', '%' . $keyword . '%');
+    //                 })
+    //                 ->orWhereHas('areaDetail', function ($q2) use ($keyword) {
+    //                     $q2->where('name', 'like', '%' . $keyword . '%');
+    //                 })
+    //                 ->orWhereHas('propertyType', function ($q2) use ($keyword) {
+    //                     $q2->where('name', 'like', '%' . $keyword . '%');
+    //                 });
+    //         });
+    //     }
 
-        if ($applySorting) {
-            $sort = $request->get('sort', 'latest');
+    //     if ($applySorting) {
+    //         $sort = $request->get('sort', 'latest');
 
-            switch ($sort) {
-                case 'price_asc':
-                    $query->orderBy('price', 'asc');
-                    break;
+    //         switch ($sort) {
+    //             case 'price_asc':
+    //                 $query->orderBy('price', 'asc');
+    //                 break;
 
-                case 'price_desc':
-                    $query->orderBy('price', 'desc');
-                    break;
+    //             case 'price_desc':
+    //                 $query->orderBy('price', 'desc');
+    //                 break;
 
-                case 'area_desc':
-                    $query->orderBy('area_size', 'desc');
-                    break;
+    //             case 'area_desc':
+    //                 $query->orderBy('area_size', 'desc');
+    //                 break;
 
-                case 'oldest':
-                    $query->orderBy('created_at', 'asc');
-                    break;
+    //             case 'oldest':
+    //                 $query->orderBy('created_at', 'asc');
+    //                 break;
 
-                default:
-                    if (Schema::hasColumn('properties', 'is_super_hot')) {
-                        $query->orderBy('is_super_hot', 'desc');
-                    }
-                    if (Schema::hasColumn('properties', 'is_hot')) {
-                        $query->orderBy('is_hot', 'desc');
-                    }
-                    if (Schema::hasColumn('properties', 'is_featured')) {
-                        $query->orderBy('is_featured', 'desc');
-                    }
-                    $query->orderBy('created_at', 'desc');
-                    break;
-            }
-        }
+    //             default:
+    //                 if (Schema::hasColumn('properties', 'is_super_hot')) {
+    //                     $query->orderBy('is_super_hot', 'desc');
+    //                 }
+    //                 if (Schema::hasColumn('properties', 'is_hot')) {
+    //                     $query->orderBy('is_hot', 'desc');
+    //                 }
+    //                 if (Schema::hasColumn('properties', 'is_featured')) {
+    //                     $query->orderBy('is_featured', 'desc');
+    //                 }
+    //                 $query->orderBy('created_at', 'desc');
+    //                 break;
+    //         }
+    //     }
 
-        return $query;
+    //     return $query;
+    // }
+
+
+private function buildListingQuery(Request $request, bool $applySorting = true): Builder
+{
+    $query = Property::query()->with([
+        'city',
+        'areaDetail',
+        'propertyType',
+        'images',
+        'features',
+        'amenities',
+        'user',
+        'user.agency',
+    ]);
+
+    if (Schema::hasColumn('properties', 'status')) {
+        $query->whereIn('status', ['active', 'published']);
     }
+
+    if ($request->filled('city_id')) {
+        $query->where('city_id', $request->city_id);
+    }
+
+    if ($request->filled('area_id')) {
+        $query->where('area_id', $request->area_id);
+    } elseif ($request->filled('area')) {
+        $area = trim((string) $request->area);
+        $query->where(function ($q) use ($area) {
+            $q->where('area', 'like', '%' . $area . '%')
+              ->orWhereHas('areaDetail', function ($q2) use ($area) {
+                  $q2->where('name', 'like', '%' . $area . '%');
+              });
+        });
+    }
+
+    if ($request->filled('property_type_id')) {
+        $query->where('property_type_id', $request->property_type_id);
+    }
+
+    if ($request->filled('purpose')) {
+        $query->where('purpose', $request->purpose);
+    }
+
+    if ($request->filled('category')) {
+        $this->applyCategoryFilter($query, $request->category);
+    }
+
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    $minArea = $request->get('min_area', $request->get('area_min'));
+    $maxArea = $request->get('max_area', $request->get('area_max'));
+
+    if (!is_null($minArea) && $minArea !== '') {
+        $query->where('area_size', '>=', $minArea);
+    }
+
+    if (!is_null($maxArea) && $maxArea !== '') {
+        $query->where('area_size', '<=', $maxArea);
+    }
+
+    if ($request->filled('bedrooms')) {
+        $query->where('bedrooms', '>=', (int) $request->bedrooms);
+    }
+
+    if ($request->filled('bathrooms')) {
+        $query->where('bathrooms', '>=', (int) $request->bathrooms);
+    }
+
+    if ($request->boolean('is_featured')) {
+        $query->where('is_featured', 1);
+    }
+
+    if ($request->boolean('is_hot')) {
+        $query->where('is_hot', 1);
+    }
+
+    if ($request->boolean('is_super_hot')) {
+        $query->where('is_super_hot', 1);
+    }
+
+    if ($request->boolean('with_photos')) {
+        $query->whereHas('images');
+    }
+
+    if ($request->filled('agency_type')) {
+        $agencyType = Str::lower(trim((string) $request->agency_type));
+
+        if ($agencyType === 'agent') {
+            $query->whereHas('user', function ($q) {
+                $q->where(function ($inner) {
+                    $inner->where('is_agent', 1)
+                          ->orWhereNotNull('agency_id');
+                });
+            });
+        }
+
+        if ($agencyType === 'individual') {
+            $query->whereHas('user', function ($q) {
+                $q->where(function ($inner) {
+                    $inner->whereNull('agency_id')
+                          ->where(function ($sub) {
+                              $sub->where('is_agent', 0)
+                                  ->orWhereNull('is_agent');
+                          });
+                });
+            });
+        }
+    }
+
+    if ($request->filled('posted_within')) {
+        $postedWithin = (string) $request->posted_within;
+
+        if ($postedWithin === 'today') {
+            $query->whereDate('created_at', now()->toDateString());
+        } elseif (in_array($postedWithin, ['3', '7', '14'], true)) {
+            $query->where('created_at', '>=', now()->subDays((int) $postedWithin));
+        }
+    }
+
+    if ($request->filled('amenity_ids')) {
+        $amenityIds = is_array($request->amenity_ids)
+            ? $request->amenity_ids
+            : array_filter(explode(',', (string) $request->amenity_ids));
+
+        if (!empty($amenityIds)) {
+            $query->whereHas('amenities', function ($q) use ($amenityIds) {
+                $q->whereIn('amenities.id', $amenityIds);
+            });
+        }
+    }
+
+    if ($request->filled('keyword')) {
+        $keyword = trim((string) $request->keyword);
+
+        $query->where(function ($q) use ($keyword) {
+            $q->where('title', 'like', '%' . $keyword . '%')
+              ->orWhere('description', 'like', '%' . $keyword . '%')
+              ->orWhere('area', 'like', '%' . $keyword . '%')
+              ->orWhereHas('city', function ($q2) use ($keyword) {
+                  $q2->where('name', 'like', '%' . $keyword . '%');
+              })
+              ->orWhereHas('areaDetail', function ($q2) use ($keyword) {
+                  $q2->where('name', 'like', '%' . $keyword . '%');
+              })
+              ->orWhereHas('propertyType', function ($q2) use ($keyword) {
+                  $q2->where('name', 'like', '%' . $keyword . '%');
+              });
+        });
+    }
+
+    if ($applySorting) {
+        $sort = $request->get('sort', 'latest');
+
+        switch ($sort) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+
+            case 'area_desc':
+                $query->orderBy('area_size', 'desc');
+                break;
+
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+
+            default:
+                if (Schema::hasColumn('properties', 'is_super_hot')) {
+                    $query->orderBy('is_super_hot', 'desc');
+                }
+                if (Schema::hasColumn('properties', 'is_hot')) {
+                    $query->orderBy('is_hot', 'desc');
+                }
+                if (Schema::hasColumn('properties', 'is_featured')) {
+                    $query->orderBy('is_featured', 'desc');
+                }
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+    }
+
+    return $query;
+}
+
+
+
+
+
+
+
 
     private function applyCategoryFilter(Builder $query, string $category): void
     {
@@ -790,61 +1404,130 @@ class PropertyController extends Controller
         });
     }
 
-    private function formatListingCard(Property $property, ?int $authUserId = null): array
-    {
-        $mainImage = optional($property->images->sortByDesc('is_primary')->first())->url;
+    // private function formatListingCard(Property $property, ?int $authUserId = null): array
+    // {
+    //     $mainImage = optional($property->images->sortByDesc('is_primary')->first())->url;
 
-        $featuredLabel = null;
-        if ($property->is_super_hot) {
-            $featuredLabel = 'super-hot';
-        } elseif ($property->is_hot) {
-            $featuredLabel = 'hot';
-        } elseif ($property->is_featured) {
-            $featuredLabel = 'featured';
-        }
+    //     $featuredLabel = null;
+    //     if ($property->is_super_hot) {
+    //         $featuredLabel = 'super-hot';
+    //     } elseif ($property->is_hot) {
+    //         $featuredLabel = 'hot';
+    //     } elseif ($property->is_featured) {
+    //         $featuredLabel = 'featured';
+    //     }
 
-        $locationText = collect([
-            $property->areaDetail?->name ?: $property->area,
-            $property->city?->name,
-        ])->filter()->implode(', ');
+    //     $locationText = collect([
+    //         $property->areaDetail?->name ?: $property->area,
+    //         $property->city?->name,
+    //     ])->filter()->implode(', ');
 
-        $isFavorite = false;
-        if ($authUserId) {
-            $isFavorite = $property->favoritedBy()->where('user_id', $authUserId)->exists();
-        }
+    //     $isFavorite = false;
+    //     if ($authUserId) {
+    //         $isFavorite = $property->favoritedBy()->where('user_id', $authUserId)->exists();
+    //     }
 
-        return [
-            'id' => $property->id,
-            'slug' => $property->slug,
-            'title' => $property->title,
-            'price' => (float) $property->price,
-            'currency' => 'MAD',
-            'purpose' => $property->purpose,
-            'location_text' => $locationText,
-            'city' => $property->city?->name,
-            'area_name' => $property->areaDetail?->name ?: $property->area,
-            'property_type' => $property->propertyType?->name,
-            'bedrooms' => $property->bedrooms,
-            'bathrooms' => $property->bathrooms,
-            'area_size' => $property->area_size,
-            'area_unit' => $property->area_unit,
-            'description_short' => Str::limit(strip_tags((string) $property->description), 140),
-            'is_featured' => (bool) $property->is_featured,
-            'is_hot' => (bool) $property->is_hot,
-            'is_super_hot' => (bool) $property->is_super_hot,
-            'featured_label' => $featuredLabel,
-            'main_image' => $mainImage,
-            'images_count' => $property->images->count(),
-            'is_favorite' => $isFavorite,
-            'added_at' => optional($property->created_at)->diffForHumans(),
-            'updated_at' => optional($property->updated_at)->diffForHumans(),
-            'agent' => $property->user ? [
-                'id' => $property->user->id,
-                'name' => $property->user->name,
-                'agency' => $property->user->agency?->name,
-            ] : null,
-        ];
+    //     return [
+    //         'id' => $property->id,
+    //         'slug' => $property->slug,
+    //         'title' => $property->title,
+    //         'price' => (float) $property->price,
+    //         'currency' => 'MAD',
+    //         'purpose' => $property->purpose,
+    //         'location_text' => $locationText,
+    //         'city' => $property->city?->name,
+    //         'area_name' => $property->areaDetail?->name ?: $property->area,
+    //         'property_type' => $property->propertyType?->name,
+    //         'bedrooms' => $property->bedrooms,
+    //         'bathrooms' => $property->bathrooms,
+    //         'area_size' => $property->area_size,
+    //         'area_unit' => $property->area_unit,
+    //         'description_short' => Str::limit(strip_tags((string) $property->description), 140),
+    //         'is_featured' => (bool) $property->is_featured,
+    //         'is_hot' => (bool) $property->is_hot,
+    //         'is_super_hot' => (bool) $property->is_super_hot,
+    //         'featured_label' => $featuredLabel,
+    //         'main_image' => $mainImage,
+    //         'images_count' => $property->images->count(),
+    //         'is_favorite' => $isFavorite,
+    //         'added_at' => optional($property->created_at)->diffForHumans(),
+    //         'updated_at' => optional($property->updated_at)->diffForHumans(),
+    //         'agent' => $property->user ? [
+    //             'id' => $property->user->id,
+    //             'name' => $property->user->name,
+    //             'agency' => $property->user->agency?->name,
+    //         ] : null,
+    //     ];
+    // }
+
+
+
+
+private function formatListingCard(Property $property, ?int $authUserId = null): array
+{
+    $mainImage = optional($property->images->sortByDesc('is_primary')->first())->url;
+
+    $featuredLabel = null;
+    if ($property->is_super_hot) {
+        $featuredLabel = 'super-hot';
+    } elseif ($property->is_hot) {
+        $featuredLabel = 'hot';
+    } elseif ($property->is_featured) {
+        $featuredLabel = 'featured';
     }
+
+    $locationText = collect([
+        $property->areaDetail?->name ?: $property->area,
+        $property->city?->name,
+    ])->filter()->implode(', ');
+
+    $isFavorite = false;
+    if ($authUserId) {
+        $isFavorite = $property->favoritedBy()->where('user_id', $authUserId)->exists();
+    }
+
+    return [
+        'id' => $property->id,
+        'slug' => $property->slug,
+        'title' => $property->title,
+        'price' => (float) $property->price,
+        'currency' => 'MAD',
+        'purpose' => $property->purpose,
+        'location_text' => $locationText,
+        'city' => $property->city?->name,
+        'area_name' => $property->areaDetail?->name ?: $property->area,
+        'property_type' => $property->propertyType?->name,
+        'bedrooms' => $property->bedrooms,
+        'bathrooms' => $property->bathrooms,
+        'area_size' => $property->area_size,
+        'area_unit' => $property->area_unit,
+        'description_short' => Str::limit(strip_tags((string) $property->description), 140),
+        'is_featured' => (bool) $property->is_featured,
+        'is_hot' => (bool) $property->is_hot,
+        'is_super_hot' => (bool) $property->is_super_hot,
+        'featured_label' => $featuredLabel,
+        'main_image' => $mainImage,
+        'images_count' => $property->images->count(),
+        'is_favorite' => $isFavorite,
+        'added_at' => optional($property->created_at)->diffForHumans(),
+        'updated_at' => optional($property->updated_at)->diffForHumans(),
+        'agent' => $property->user ? [
+            'id' => $property->user->id,
+            'name' => $property->user->name,
+            'agency' => $property->user->agency?->name,
+            'phone' => $property->user->phone,
+            'mobile' => $property->user->mobile,
+            'whatsapp' => $property->user->whatsapp,
+            'landline' => $property->user->landline,
+        ] : null,
+    ];
+}
+
+
+
+
+
+
 
     private function formatDetailPayload(Property $property, ?int $authUserId = null): array
     {
@@ -987,31 +1670,72 @@ class PropertyController extends Controller
         ];
     }
 
-    private function buildTypeTabs(Builder $query): array
+//     private function buildTypeTabs(Builder $query): array
+// {
+//     $rows = (clone $query)
+//         ->reorder() // previous orderBy hata do
+//         ->selectRaw('property_type_id, COUNT(*) as total')
+//         ->whereNotNull('property_type_id')
+//         ->groupBy('property_type_id')
+//         ->orderByDesc('total')
+//         ->get();
+
+//     if ($rows->isEmpty()) {
+//         return [];
+//     }
+
+//     $typeIds = $rows->pluck('property_type_id')->all();
+//     $types = PropertyType::whereIn('id', $typeIds)->get()->keyBy('id');
+
+//     return $rows->map(function ($row) use ($types) {
+//         return [
+//             'id' => $row->property_type_id,
+//             'label' => $types[$row->property_type_id]->name ?? 'Type',
+//             'count' => (int) $row->total,
+//         ];
+//     })->values()->toArray();
+// }
+
+
+
+
+private function buildTypeTabs(Builder $query): array
 {
-    $rows = (clone $query)
-        ->reorder() // previous orderBy hata do
-        ->selectRaw('property_type_id, COUNT(*) as total')
-        ->whereNotNull('property_type_id')
-        ->groupBy('property_type_id')
-        ->orderByDesc('total')
-        ->get();
+    $properties = (clone $query)
+        ->reorder()
+        ->with('propertyType:id,name')
+        ->get(['id', 'property_type_id']);
 
-    if ($rows->isEmpty()) {
-        return [];
-    }
+    $labels = [
+        'homes' => 'Homes',
+        'plots' => 'Plots',
+        'commercial' => 'Commercial',
+    ];
 
-    $typeIds = $rows->pluck('property_type_id')->all();
-    $types = PropertyType::whereIn('id', $typeIds)->get()->keyBy('id');
+    $grouped = $properties->groupBy(function ($property) {
+        return $this->resolveTypeGroup($property->propertyType?->name ?? '');
+    });
 
-    return $rows->map(function ($row) use ($types) {
-        return [
-            'id' => $row->property_type_id,
-            'label' => $types[$row->property_type_id]->name ?? 'Type',
-            'count' => (int) $row->total,
-        ];
-    })->values()->toArray();
+    return collect(['homes', 'plots', 'commercial'])
+        ->map(function ($key) use ($grouped, $labels) {
+            return [
+                'id' => $key,
+                'value' => $key,
+                'label' => $labels[$key],
+                'count' => $grouped->get($key, collect())->count(),
+            ];
+        })
+        ->filter(fn ($tab) => $tab['count'] > 0)
+        ->values()
+        ->toArray();
 }
+
+
+
+
+
+
+
 
     private function buildAreaBuckets(Builder $query): array
 {
@@ -1071,4 +1795,209 @@ class PropertyController extends Controller
             default => null,
         };
     }
+
+
+
+
+private function postListingRules(Request $request): array
+{
+    $userId = $request->user()?->id;
+
+    return [
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'city_id' => 'required|exists:cities,id',
+        // 'area_id' => 'nullable|exists:areas,id',
+        'area_id' => 'required|exists:areas,id',
+        'area' => 'nullable|string|max:255',
+        'price' => 'required|numeric|min:0',
+        'property_type_id' => 'required|exists:property_types,id',
+        'purpose' => 'required|in:sale,rent',
+        'bedrooms' => 'nullable',
+        'bathrooms' => 'nullable',
+        'area_size' => 'nullable|numeric|min:0',
+        'area_unit' => 'nullable|string|max:50',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+
+        'email' => 'nullable|email|max:255|unique:users,email,' . $userId,
+        'mobile' => 'nullable|string|max:50',
+        'landline' => 'nullable|string|max:50',
+
+        'amenities' => 'nullable|array',
+        'amenities.*' => 'integer|exists:amenities,id',
+
+        'features' => 'nullable|array',
+
+        'images' => 'nullable|array',
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+
+        'delete_image_ids' => 'nullable|array',
+        'delete_image_ids.*' => 'integer|exists:property_images,id',
+    ];
+}
+
+private function buildFeaturePayload(Request $request): array
+{
+    $features = $request->input('features', []);
+
+    return [
+        'bedrooms' => $this->normalizeCountValue($request->input('bedrooms')),
+        'bathrooms' => $this->normalizeCountValue($request->input('bathrooms')),
+        'area' => $request->input('area_size'),
+        'area_unit' => $request->input('area_unit'),
+
+        'furnished' => $this->toBool(data_get($features, 'furnished')),
+        'built_year' => data_get($features, 'built_year'),
+        'flooring' => data_get($features, 'flooring'),
+        'view' => data_get($features, 'view'),
+        'other_main_features' => data_get($features, 'other_main_features'),
+        'floors' => data_get($features, 'floors'),
+        'parking_spaces' => $this->normalizeCountValue(data_get($features, 'parking_spaces')),
+        'electricity_backup' => $this->toBool(data_get($features, 'electricity_backup')),
+        'central_ac' => $this->toBool(data_get($features, 'central_ac')),
+        'central_heating' => $this->toBool(data_get($features, 'central_heating')),
+        'double_glazed_windows' => $this->toBool(data_get($features, 'double_glazed_windows')),
+
+        'other_rooms' => data_get($features, 'other_rooms'),
+        'kitchens' => $this->normalizeCountValue(data_get($features, 'kitchens')),
+        'drawing_room' => $this->toBool(data_get($features, 'drawing_room')),
+        'study_room' => $this->toBool(data_get($features, 'study_room')),
+        'store_room' => $this->toBool(data_get($features, 'store_room')),
+        'servant_quarter' => $this->toBool(data_get($features, 'servant_quarter')),
+        'prayer_room' => $this->toBool(data_get($features, 'prayer_room')),
+        'dining_room' => $this->toBool(data_get($features, 'dining_room')),
+
+        'other_business_communication' => data_get($features, 'other_business_communication'),
+        'broadband_internet_access' => $this->toBool(data_get($features, 'broadband_internet_access')),
+        'satellite_or_cable_tv_ready' => $this->toBool(data_get($features, 'satellite_or_cable_tv_ready')),
+        'intercom' => $this->toBool(data_get($features, 'intercom')),
+
+        'other_community_facilities' => data_get($features, 'other_community_facilities'),
+        'community_lawn_or_garden' => $this->toBool(data_get($features, 'community_lawn_or_garden')),
+        'community_swimming_pool' => $this->toBool(data_get($features, 'community_swimming_pool')),
+        'community_gym' => $this->toBool(data_get($features, 'community_gym')),
+        'first_aid_or_medical_centre' => $this->toBool(data_get($features, 'first_aid_or_medical_centre')),
+        'day_care_centre' => $this->toBool(data_get($features, 'day_care_centre')),
+        'kids_play_area' => $this->toBool(data_get($features, 'kids_play_area')),
+        'barbecue_area' => $this->toBool(data_get($features, 'barbecue_area')),
+        'mosque' => $this->toBool(data_get($features, 'mosque')),
+        'community_centre' => $this->toBool(data_get($features, 'community_centre')),
+
+        'other_healthcare_recreation' => data_get($features, 'other_healthcare_recreation'),
+        'lawn_or_garden' => $this->toBool(data_get($features, 'lawn_or_garden')),
+        'swimming_pool' => $this->toBool(data_get($features, 'swimming_pool')),
+        'sauna' => $this->toBool(data_get($features, 'sauna')),
+        'jacuzzi' => $this->toBool(data_get($features, 'jacuzzi')),
+
+        'nearby_schools' => data_get($features, 'nearby_schools'),
+        'nearby_hospitals' => data_get($features, 'nearby_hospitals'),
+        'nearby_restaurants' => data_get($features, 'nearby_restaurants'),
+        'nearby_shopping_malls' => data_get($features, 'nearby_shopping_malls'),
+        'distance_from_airport' => data_get($features, 'distance_from_airport'),
+        'nearby_public_transport' => data_get($features, 'nearby_public_transport'),
+        'other_nearby_places' => data_get($features, 'other_nearby_places'),
+
+        'other_facilities' => data_get($features, 'other_facilities'),
+        'maintenance_staff' => $this->toBool(data_get($features, 'maintenance_staff')),
+        'security_staff' => $this->toBool(data_get($features, 'security_staff')),
+        'facilities_for_disabled' => $this->toBool(data_get($features, 'facilities_for_disabled')),
+    ];
+}
+
+private function updateUserContactFromListingForm($user, Request $request): void
+{
+    if (!$user) {
+        return;
+    }
+
+    $dirty = false;
+
+    if ($request->filled('email') && $user->email !== $request->email) {
+        $user->email = $request->email;
+        $dirty = true;
+    }
+
+    if ($request->has('mobile')) {
+        $user->mobile = $request->mobile;
+        $dirty = true;
+    }
+
+    if ($request->has('landline')) {
+        $user->landline = $request->landline;
+        $dirty = true;
+    }
+
+    if ($dirty) {
+        $user->save();
+    }
+}
+
+private function normalizeCountValue($value): ?int
+{
+    if ($value === null || $value === '') {
+        return null;
+    }
+
+    if (is_string($value)) {
+        $value = strtolower(trim($value));
+
+        if ($value === 'studio') {
+            return 0;
+        }
+
+        if (str_ends_with($value, '+')) {
+            $value = rtrim($value, '+');
+        }
+    }
+
+    return is_numeric($value) ? (int) $value : null;
+}
+
+private function toBool($value): bool
+{
+    return in_array($value, [true, 1, '1', 'true', 'on', 'yes'], true);
+}
+
+private function resolveTypeGroup(string $typeName): string
+{
+    $typeName = Str::lower(trim($typeName));
+
+    $plots = [
+        'plot',
+        'plots',
+        'residential plot',
+        'commercial plot',
+        'agricultural land',
+        'industrial land',
+    ];
+
+    $commercial = [
+        'commercial',
+        'office',
+        'shop',
+        'warehouse',
+        'building',
+        'floor',
+        'factory',
+        'hall',
+        'plaza',
+    ];
+
+    if (in_array($typeName, $plots, true) || str_contains($typeName, 'plot')) {
+        return 'plots';
+    }
+
+    if (in_array($typeName, $commercial, true) || str_contains($typeName, 'commercial')) {
+        return 'commercial';
+    }
+
+    return 'homes';
+}
+
+
+
+
+
+
 }

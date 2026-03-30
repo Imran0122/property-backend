@@ -1,6 +1,6 @@
 <?php
 use App\Http\Controllers\API\HomeLoanController;
-
+use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PropertyController;
 use App\Http\Controllers\API\CityController;
@@ -24,6 +24,12 @@ use App\Http\Controllers\API\Admin\AdminPropertyController;
 use App\Http\Controllers\API\Admin\AdminAgentController;
 use App\Http\Controllers\API\Admin\PropertyApprovalController;
 use App\Http\Controllers\API\Admin\AgentApprovalController;
+use App\Http\Controllers\API\Admin\AdminDashboardController;
+use App\Http\Controllers\API\Admin\RecentPropertiesController;
+use App\Http\Controllers\API\Admin\ReportController;
+use App\Http\Controllers\API\Admin\AdminUserController;
+use App\Http\Controllers\API\Admin\AdminArticleController;
+use App\Http\Controllers\API\Admin\AdminSettingsController;
 use App\Http\Controllers\API\HomeApiController;
 use App\Http\Controllers\API\SavedSearchController;
 use App\Http\Controllers\API\SavedPropertyController;
@@ -69,7 +75,7 @@ use App\Http\Controllers\API\PropertyBoutiqueController;
 
 
 Route::get('/amenities', [AmenityController::class,'index']);
-Route::get('/dashboard-stats', [DashboardController::class, 'getStats']);
+Route::get('/dashboard-stats', [DashboardController::class, 'index']);
 Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
 
 Route::get('/properties/search', [PropertyController::class, 'searchApi']);
@@ -112,7 +118,7 @@ Route::get('/saved-searches', [SavedSearchController::class, 'index']);
 
 
 // Route::post('/properties', [PropertyController::class, 'store']);
-Route::post('/properties', [PropertyController::class, 'store']);
+// Route::post('/properties', [PropertyController::class, 'store']);
 
 
 Route::get('admin/dashboard', [DashboardController::class, 'index']);
@@ -200,11 +206,12 @@ Route::get('{type}/{city}', [PropertyController::class, 'locationSearch'])
 
 
 
+
 // ---------------- Public APIs ---------------- //
 Route::get('/properties', [PropertyController::class, 'index']); 
-Route::get('/dashboard/properties',[PropertyController::class,'dashboardProperties']);
+// Route::get('/dashboard/properties',[PropertyController::class,'dashboardProperties']);
 
-Route::get('/dashboard/properties/stats',[PropertyController::class,'dashboardPropertyStats']);  
+// Route::get('/dashboard/properties/stats',[PropertyController::class,'dashboardPropertyStats']);  
        // List properties with filters
 
 
@@ -218,14 +225,33 @@ Route::get('/areas', [AreaController::class, 'index']); // ?city_id=1
 
 // // ---------------- Protected APIs ---------------- //
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
     Route::get('/my-properties', [DashboardController::class, 'myProperties']);
 
+    Route::get('/dashboard/properties', [PropertyController::class, 'dashboardProperties']);
+    Route::get('/dashboard/properties/stats', [PropertyController::class, 'dashboardPropertyStats']);
+
+    Route::get('/dashboard/post-listing/meta', [PropertyController::class, 'dashboardPostListingMeta']);
+    Route::get('/dashboard/post-listing/{id}', [PropertyController::class, 'dashboardPostListingShow']);
+    Route::post('/dashboard/post-listing', [PropertyController::class, 'store']);
+    Route::post('/dashboard/post-listing/{id}', [PropertyController::class, 'update']);
+
+    Route::post('/properties', [PropertyController::class, 'store']);
+    Route::put('/properties/{id}', [PropertyController::class, 'update']);
+    Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+
+    Route::post('/properties/{id}/favorite', [PropertyController::class, 'toggleFavorite']);
+
+    Route::post('/messages/send', [MessageController::class, 'send']);
+    Route::get('/messages/conversations', [MessageController::class, 'conversations']);
+    Route::get('/messages/conversation/{otherUserId}/{propertyId?}', [MessageController::class, 'conversation']);
+    Route::post('/messages/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
 });
+
+// });
     // Property CRUD
-    Route::post('/properties', [PropertyController::class, 'store']);      // Add property
+    // Route::post('/properties', [PropertyController::class, 'store']);      // Add property
     Route::put('/properties/{id}', [PropertyController::class, 'update']); // Update property
     Route::delete('/properties/{id}', [PropertyController::class, 'destroy']); // Delete property
 
@@ -253,31 +279,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // });
 
 
-Route::prefix('admin')->group(function () {
-
-    // Properties
-    Route::get('/properties/pending', [AdminController::class, 'pendingProperties']);
-    Route::post('/properties/{id}/approve', [AdminController::class, 'approveProperty']);
-    Route::post('/properties/{id}/reject', [AdminController::class, 'rejectProperty']);
-
-    Route::post('/properties/{id}/feature', [AdminController::class, 'featureProperty']);
-    Route::post('/properties/{id}/unfeature', [AdminController::class, 'unfeatureProperty']);
-
-    // Agents
-    Route::get('/agents/pending', [AdminController::class, 'pendingAgents']);
-    Route::post('/agents/{id}/approve', [AdminController::class, 'approveAgent']);
-    Route::post('/agents/{id}/reject', [AdminController::class, 'rejectAgent']);
-});
-
-Route::prefix('admin')->group(function () {
-    Route::post('properties/{id}/feature', [
-        \App\Http\Controllers\API\Admin\PropertyApprovalController::class,
-        'feature'
-    ]);
-});
-
-
-
 Route::middleware('auth:sanctum')->group(function () {
 
     // Inbox page APIs
@@ -302,12 +303,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/settings/preferences', [SettingsController::class, 'updatePreferences']);
     Route::post('/settings/password', [SettingsController::class, 'changePassword']);
 });
+
 Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function () {
     Route::get('/products', [PropertyBoutiqueController::class, 'products']);
     Route::get('/cart', [PropertyBoutiqueController::class, 'cart']);
     Route::post('/cart', [PropertyBoutiqueController::class, 'addToCart']);
     Route::patch('/cart/{id}', [PropertyBoutiqueController::class, 'updateCartItem']);
-    Route::delete('/cart/{id}', [PropertyBoutiqueController::class, 'removeFromCart']);
+    Route::delete('/cart/{id}', [PropertyBoutiqueController::class, 'removeCartItem']);
     Route::delete('/cart', [PropertyBoutiqueController::class, 'clearCart']);
 
     Route::post('/checkout', [PropertyBoutiqueController::class, 'checkout']);
@@ -318,51 +320,73 @@ Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function (
 
 
 
-Route::prefix('admin')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Admin APIs (Cleaned - merged duplicate admin route groups only)
+|--------------------------------------------------------------------------
+*/
+/*
+|--------------------------------------------------------------------------
+| Admin APIs (Cleaned - merged duplicate admin route groups only)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
 
-    // Properties
-    Route::get('/properties/pending', [AdminPropertyController::class, 'pending']);
-    Route::post('/properties/{id}/approve', [AdminPropertyController::class, 'approve']);
-    Route::post('/properties/{id}/reject', [AdminPropertyController::class, 'reject']);
-    Route::post('/properties/{id}/feature', [AdminPropertyController::class, 'feature']);
-
-    // Agents
-    Route::get('/agents/pending', [AdminAgentController::class, 'pending']);
-    Route::post('/agents/{id}/approve', [AdminAgentController::class, 'approve']);
-    Route::post('/agents/{id}/reject', [AdminAgentController::class, 'reject']);
-});
-
-
-Route::prefix('admin')->group(function () {
-
-    // 🔹 Property approval
-    Route::get('properties/pending', [PropertyApprovalController::class, 'pending']);
-    Route::post('properties/{id}/approve', [PropertyApprovalController::class, 'approve']);
-    Route::post('properties/{id}/reject', [PropertyApprovalController::class, 'reject']);
-
-    // 🔹 Agent approval
-    Route::get('agents/pending', [AgentApprovalController::class, 'pending']);
-    Route::post('agents/{id}/approve', [AgentApprovalController::class, 'approve']);
-    Route::post('agents/{id}/reject', [AgentApprovalController::class, 'reject']);
-
-    // 🔹 Inquiries
-    Route::get('inquiries', [InquiryController::class, 'index']);
-});
-
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('dashboard/stats', [AdminDashboardController::class, 'stats']);
 
     // Property moderation
-    Route::post('/properties/{id}/approve', [PropertyApprovalController::class, 'approve']);
-    Route::post('/properties/{id}/reject', [PropertyApprovalController::class, 'reject']);
-    Route::post('/properties/{id}/feature', [PropertyApprovalController::class, 'feature']);
+    // IMPORTANT: special routes pehle, {id} baad me
+    Route::get('properties/recent', [RecentPropertiesController::class, 'index']);
+    Route::get('properties/pending', [PropertyApprovalController::class, 'pending']);
+
+    Route::get('properties/{id}', [PropertyApprovalController::class, 'show'])->whereNumber('id');
+    Route::post('properties/{id}/approve', [PropertyApprovalController::class, 'approve'])->whereNumber('id');
+    Route::post('properties/{id}/reject', [PropertyApprovalController::class, 'reject'])->whereNumber('id');
+    Route::post('properties/{id}/status', [PropertyApprovalController::class, 'updateStatus'])->whereNumber('id');
+    Route::post('properties/{id}/feature', [PropertyApprovalController::class, 'feature'])->whereNumber('id');
+    Route::post('properties/{id}/unfeature', [PropertyApprovalController::class, 'unfeature'])->whereNumber('id');
 
     // Agent moderation
-    Route::post('/agents/{id}/approve', [AgentApprovalController::class, 'approve']);
-    Route::post('/agents/{id}/reject', [AgentApprovalController::class, 'reject']);
+    Route::get('agents/pending', [AgentApprovalController::class, 'pending']);
+    Route::post('agents/{id}/approve', [AgentApprovalController::class, 'approve'])->whereNumber('id');
+    Route::post('agents/{id}/reject', [AgentApprovalController::class, 'reject'])->whereNumber('id');
 
     // Inquiries
-    Route::get('/inquiries', [InquiryController::class, 'index']);
+    Route::get('inquiries', [InquiryController::class, 'index']);
+
+    // Reports
+    Route::get('report/properties', [ReportController::class, 'propertiesReport']);
+
+    // Payments approval
+    Route::post('invoice/{id}/approve', [PaymentApprovalController::class, 'approve'])->whereNumber('id');
+
+
+    // Users & Agents Management
+Route::get('users', [AdminUserController::class, 'index']);
+Route::get('users/{id}', [AdminUserController::class, 'show'])->whereNumber('id');
+Route::put('users/{id}', [AdminUserController::class, 'update'])->whereNumber('id');
+Route::post('users/{id}/suspend', [AdminUserController::class, 'suspend'])->whereNumber('id');
+Route::post('users/{id}/activate', [AdminUserController::class, 'activate'])->whereNumber('id');
+
+
+// Articles & Blog Management
+Route::get('articles', [AdminArticleController::class, 'index']);
+Route::get('articles/meta', [AdminArticleController::class, 'meta']);
+Route::get('articles/{id}', [AdminArticleController::class, 'show'])->whereNumber('id');
+Route::post('articles', [AdminArticleController::class, 'store']);
+Route::put('articles/{id}', [AdminArticleController::class, 'update'])->whereNumber('id');
+Route::delete('articles/{id}', [AdminArticleController::class, 'destroy'])->whereNumber('id');
+Route::post('articles/{id}/publish', [AdminArticleController::class, 'publish'])->whereNumber('id');
+Route::post('articles/{id}/draft', [AdminArticleController::class, 'draft'])->whereNumber('id');
+
+
+// settings
+  Route::get('/settings', [AdminSettingsController::class, 'index']);
+    Route::put('/settings', [AdminSettingsController::class, 'update']);
+
 });
+
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -381,17 +405,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     // Payment approval
     Route::post('/admin/invoice/{id}/approve', [PaymentApprovalController::class, 'approve']);
 });
-Route::prefix('admin')->group(function () {
-    Route::post('properties/{id}/status', [PropertyApprovalController::class, 'updateStatus']);
-    Route::post('properties/{id}/feature', [PropertyApprovalController::class, 'feature']);
-});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('save-property', [SavedPropertyController::class, 'toggle']);
     Route::get('saved-properties', [SavedPropertyController::class, 'index']);
 });
-
-
-
-
-

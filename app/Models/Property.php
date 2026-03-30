@@ -122,12 +122,12 @@ class Property extends Model
         });
     }
 
-    public function getUrlAttribute()
-{
-    if (!$this->image_path) {
-        return null;
-    }
+//     public function getUrlAttribute()
+// {
+//     if (!$this->image_path) {
+//         return null;
+//     }
 
-    return asset('storage/' . $this->image_path);
-}
+//     return asset('storage/' . $this->image_path);
+// }
 }

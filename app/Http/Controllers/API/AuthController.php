@@ -9,57 +9,94 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-   public function register(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6',
-    ]);
-
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-    ]);
-
-    // 👇 YEH LINE AUTO LOGIN KE LIYE IMPORTANT HAI
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'User registered successfully',
-        'user' => $user,
-        'token' => $token,
-    ], 201);
-}
-
-    public function login(Request $request)
+    public function register(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6',
+            'phone' => 'nullable|string|max:30',
+            'is_agent' => 'nullable|boolean',
+            'newsletters' => 'nullable|boolean',
+            'agency_name' => 'nullable|string|max:255',
+            'city_id' => 'nullable|integer|exists:cities,id',
+        ]);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials'
-            ], 401);
-        }
+        $isAgent = (bool) ($validated['is_agent'] ?? false);
+
+        $user = User::create([
+            'name' => trim($validated['name']),
+            'email' => strtolower(trim($validated['email'])),
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'] ?? null,
+            'role' => $isAgent ? 'agent' : 'user',
+            'is_admin' => 0,
+            'is_agent' => $isAgent ? 1 : 0,
+            'status' => 'active',
+            'agency_name' => $validated['agency_name'] ?? null,
+            'city_id' => $validated['city_id'] ?? null,
+            'email_notifications' => false,
+            'newsletters' => (bool) ($validated['newsletters'] ?? false),
+            'automated_reports' => false,
+            'currency' => 'MAD',
+            'area_unit' => 'm²',
+        ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
+            'message' => $isAgent ? 'Agent registered successfully' : 'User registered successfully',
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+        ], 201);
+    }
+
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', strtolower(trim($validated['email'])))->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        $status = strtolower((string) ($user->status ?? 'active'));
+
+        if (in_array($status, ['suspended', 'inactive'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is not active. Please contact support.',
+            ], 403);
+        }
+
+        $user->tokens()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => $user,
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        if ($request->user() && $request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out'
+            'message' => 'Logged out successfully',
         ]);
     }
 }

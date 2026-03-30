@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PropertyFeature extends Model
 {
-    protected $table = 'property_features'; // your table name
+    use HasFactory;
+
+    protected $table = 'property_features';
     protected $guarded = [];
-    protected $fillable = [
-        'property_id',
-        'bedrooms',
-        'bathrooms',
-        'area_size',
-        'furnished',
-        'floor',
-        'parking',
-    ];
+
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 }

@@ -10,22 +10,28 @@ class Agency extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'logo', 'phone', 'email', 'address', 'description'
+        'name',
+        'logo',
+        'phone',
+        'email',
+        'address',
+        'description',
     ];
 
-    // public function agents()
-    // {
-    //     return $this->hasMany(Agent::class);
-    // }
-        public function agents()
-{
-    return $this->hasMany(User::class);
-}
+    public function agents()
+    {
+        return $this->hasMany(Agent::class, 'agency_id');
+    }
 
     public function properties()
     {
-        return $this->hasManyThrough(Property::class, Agent::class);
+        return $this->hasManyThrough(
+            Property::class,
+            Agent::class,
+            'agency_id', // agents.agency_id -> agencies.id
+            'user_id',   // properties.user_id -> agents.user_id
+            'id',        // agencies.id
+            'user_id'    // agents.user_id
+        );
     }
-
-
 }
