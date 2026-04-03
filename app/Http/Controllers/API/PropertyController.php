@@ -1164,80 +1164,83 @@ class PropertyController extends Controller
             $featuredLabel = 'featured';
         }
 
-        return [
-            'property' => [
-                'id' => $property->id,
-                'slug' => $property->slug,
-                'title' => $property->title,
-                'description' => $property->description,
-                'price' => (float) $property->price,
-                'currency' => 'MAD',
-                'purpose' => $property->purpose,
-                'status' => $property->status,
-                'property_type' => $property->propertyType?->name,
-                'city' => $property->city?->name,
-                'area_name' => $property->areaDetail?->name ?: $property->area,
-                'location_text' => $locationText,
-                'bedrooms' => $property->bedrooms,
-                'bathrooms' => $property->bathrooms,
-                'area_size' => $property->area_size,
-                'area_unit' => $property->area_unit,
-                'is_featured' => (bool) $property->is_featured,
-                'is_hot' => (bool) $property->is_hot,
-                'is_super_hot' => (bool) $property->is_super_hot,
-                'featured_label' => $featuredLabel,
-                'main_image' => $mainImage,
-                'images_count' => $property->images->count(),
-                'latitude' => $property->latitude,
-                'longitude' => $property->longitude,
-                'created_at' => $property->created_at,
-                'updated_at' => $property->updated_at,
-                'is_favorite' => $isFavorite,
-            ],
-            'gallery' => $property->images
-                ->sortByDesc('is_primary')
-                ->values()
-                ->map(function ($image) {
-                    return [
-                        'id' => $image->id,
-                        'image_url' => $image->url,
-                        'is_primary' => (bool) $image->is_primary,
-                    ];
-                }),
-            'overview' => [
-                'price_per_unit' => $property->area_size > 0 ? round($property->price / $property->area_size, 2) : null,
-                'purpose' => $property->purpose,
-                'type' => $property->propertyType?->name,
-                'bedrooms' => $property->bedrooms,
-                'bathrooms' => $property->bathrooms,
-                'area_size' => $property->area_size,
-                'area_unit' => $property->area_unit,
-            ],
-            'amenities' => $amenitiesGrouped,
-            'features' => $features,
-            'feature_groups' => $featureGroups,
-            'contact' => [
-                'agent_name' => $property->user?->name,
-                'email' => $property->user?->email,
-                'mobile' => $property->user?->mobile,
-                'whatsapp' => $property->user?->whatsapp,
-                'landline' => $property->user?->landline,
-                'agency' => $property->user?->agency?->name,
-            ],
-            'location' => [
-                'city' => $property->city?->name,
-                'area' => $property->areaDetail?->name ?: $property->area,
-                'lat' => $property->latitude,
-                'lng' => $property->longitude,
-            ],
-            'finance' => [
-                'property_price' => (float) $property->price,
-                'default_years' => 25,
-                'default_deposit_percent' => 30,
-            ],
-            'price_index' => $this->buildPriceIndex($property),
-            'similar_properties' => $similar,
-        ];
+      return [
+    'property' => [
+        'id' => $property->id,
+        'slug' => $property->slug,
+        'title' => $property->title,
+        'description' => $property->description,
+        'price' => (float) $property->price,
+        'currency' => 'MAD',
+        'purpose' => $property->purpose,
+        'status' => $property->status,
+        'property_type' => $property->propertyType?->name,
+        'city' => $property->city?->name,
+        'area_name' => $property->areaDetail?->name ?: $property->area,
+        'location_text' => $locationText,
+        'bedrooms' => $property->bedrooms,
+        'bathrooms' => $property->bathrooms,
+        'area_size' => $property->area_size,
+        'area_unit' => $property->area_unit,
+        'is_featured' => (bool) $property->is_featured,
+        'is_hot' => (bool) $property->is_hot,
+        'is_super_hot' => (bool) $property->is_super_hot,
+        'featured_label' => $featuredLabel,
+        'main_image' => $mainImage,
+        'images_count' => $property->images->count(),
+        'latitude' => $property->latitude,
+        'longitude' => $property->longitude,
+        'created_at' => $property->created_at,
+        'updated_at' => $property->updated_at,
+        'is_favorite' => $isFavorite,
+    ],
+    'gallery' => $property->images
+        ->sortByDesc('is_primary')
+        ->values()
+        ->map(function ($image) {
+            return [
+                'id' => $image->id,
+                'image_url' => $image->url,
+                'is_primary' => (bool) $image->is_primary,
+            ];
+        }),
+    'overview' => [
+        'price_per_unit' => $property->area_size > 0 ? round($property->price / $property->area_size, 2) : null,
+        'purpose' => $property->purpose,
+        'type' => $property->propertyType?->name,
+        'bedrooms' => $property->bedrooms,
+        'bathrooms' => $property->bathrooms,
+        'area_size' => $property->area_size,
+        'area_unit' => $property->area_unit,
+    ],
+    'amenities' => $amenitiesGrouped,
+    'features' => $features,
+    'feature_groups' => $featureGroups,
+    'contact' => [
+        'agent_name' => $property->user?->name,
+        'email' => $property->user?->email,
+        'mobile' => $property->user?->mobile,
+        'whatsapp' => $property->user?->whatsapp,
+        'landline' => $property->user?->landline,
+        'agency' => $property->user?->agency?->name,
+    ],
+    'location' => [
+        'city' => $property->city?->name,
+        'area' => $property->areaDetail?->name ?: $property->area,
+        'lat' => $property->latitude,
+        'lng' => $property->longitude,
+    ],
+    'finance' => [
+        'property_price' => (float) $property->price,
+        'default_years' => 25,
+        'default_deposit_percent' => 30,
+    ],
+    'price_index' => [
+        'enabled' => false,
+        'series' => [],
+    ],
+    'similar_properties' => $similar,
+];
     }
 
     private function buildTypeTabs(Builder $query): array
