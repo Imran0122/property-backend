@@ -54,6 +54,7 @@ use App\Http\Controllers\API\PropertyAmenityController;
 use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\SettingsController;
 use App\Http\Controllers\API\PropertyBoutiqueController;
+use App\Http\Controllers\API\Admin\AdminSocietyController;
 // use App\Http\Controllers\API\LocationController;
 
 // use App\Http\Controllers\Api\HomeController;
@@ -384,6 +385,16 @@ Route::post('articles/{id}/draft', [AdminArticleController::class, 'draft'])->wh
 // settings
   Route::get('/settings', [AdminSettingsController::class, 'index']);
     Route::put('/settings', [AdminSettingsController::class, 'update']);
+
+
+// society
+
+// Societies Management
+Route::get('societies', [AdminSocietyController::class, 'index']);
+Route::get('societies/{id}', [AdminSocietyController::class, 'show'])->whereNumber('id');
+Route::post('societies', [AdminSocietyController::class, 'store']);
+Route::put('societies/{id}', [AdminSocietyController::class, 'update'])->whereNumber('id');
+Route::delete('societies/{id}', [AdminSocietyController::class, 'destroy'])->whereNumber('id');
 
 });
 
