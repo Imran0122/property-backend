@@ -55,6 +55,7 @@ use App\Http\Controllers\API\AmenityController;
 use App\Http\Controllers\API\SettingsController;
 use App\Http\Controllers\API\PropertyBoutiqueController;
 use App\Http\Controllers\API\Admin\AdminSocietyController;
+use App\Http\Controllers\API\Admin\AdminSocietyMapController;
 // use App\Http\Controllers\API\LocationController;
 
 // use App\Http\Controllers\Api\HomeController;
@@ -387,14 +388,19 @@ Route::post('articles/{id}/draft', [AdminArticleController::class, 'draft'])->wh
     Route::put('/settings', [AdminSettingsController::class, 'update']);
 
 
-// society
-
-// Societies Management
+// Societies
 Route::get('societies', [AdminSocietyController::class, 'index']);
-Route::get('societies/{id}', [AdminSocietyController::class, 'show'])->whereNumber('id');
 Route::post('societies', [AdminSocietyController::class, 'store']);
+Route::get('societies/{id}', [AdminSocietyController::class, 'show'])->whereNumber('id');
 Route::put('societies/{id}', [AdminSocietyController::class, 'update'])->whereNumber('id');
 Route::delete('societies/{id}', [AdminSocietyController::class, 'destroy'])->whereNumber('id');
+
+// Society Maps
+Route::get('society-maps', [AdminSocietyMapController::class, 'index']);
+Route::post('society-maps', [AdminSocietyMapController::class, 'store']);
+Route::get('society-maps/{id}', [AdminSocietyMapController::class, 'show'])->whereNumber('id');
+Route::put('society-maps/{id}', [AdminSocietyMapController::class, 'update'])->whereNumber('id');
+Route::delete('society-maps/{id}', [AdminSocietyMapController::class, 'destroy'])->whereNumber('id');
 
 });
 

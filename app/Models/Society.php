@@ -2,26 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Society extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'city_id',
         'name',
         'slug',
         'image',
         'description',
-        'views',
         'is_popular',
+        'views',
     ];
 
     protected $casts = [
-        'views' => 'integer',
         'is_popular' => 'boolean',
+        'views' => 'integer',
     ];
 
     public function city()

@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SocietyImage extends Model
 {
-    use HasFactory;
-
     protected $table = 'society_images';
 
     protected $fillable = [
         'society_id',
-        'image'
+        'image',
+        'type',
+        'title',
+        'sort_order',
     ];
 
-    /**
-     * Relationship: Image belongs to a Society
-     */
+    protected $casts = [
+        'sort_order' => 'integer',
+    ];
+
     public function society()
     {
         return $this->belongsTo(Society::class, 'society_id');
