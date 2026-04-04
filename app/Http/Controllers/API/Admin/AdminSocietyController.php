@@ -112,10 +112,17 @@ class AdminSocietyController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:societies,slug',
             'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'description' => 'nullable|string',
             'views' => 'nullable|integer|min:0',
             'is_popular' => 'nullable|boolean',
         ]);
+
+        $imagePath = $validated['image'] ?? null;
+
+        if ($request->hasFile('image_file')) {
+            $imagePath = $request->file('image_file')->store('societies', 'public');
+        }
 
         $society = Society::create([
             'city_id' => $validated['city_id'],
@@ -124,7 +131,7 @@ class AdminSocietyController extends Controller
                 $validated['slug'] ?? null,
                 $validated['name']
             ),
-            'image' => $validated['image'] ?? null,
+            'image' => $imagePath,
             'description' => $validated['description'] ?? null,
             'views' => $validated['views'] ?? 0,
             'is_popular' => isset($validated['is_popular']) ? (int) $validated['is_popular'] : 0,
@@ -155,10 +162,19 @@ class AdminSocietyController extends Controller
                 Rule::unique('societies', 'slug')->ignore($society->id),
             ],
             'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'description' => 'nullable|string',
             'views' => 'nullable|integer|min:0',
             'is_popular' => 'nullable|boolean',
         ]);
+
+        $imagePath = $society->image;
+
+        if ($request->hasFile('image_file')) {
+            $imagePath = $request->file('image_file')->store('societies', 'public');
+        } elseif (array_key_exists('image', $validated)) {
+            $imagePath = $validated['image'] ?? null;
+        }
 
         $society->update([
             'city_id' => $validated['city_id'],
@@ -168,7 +184,7 @@ class AdminSocietyController extends Controller
                 $validated['name'],
                 $society->id
             ),
-            'image' => $validated['image'] ?? null,
+            'image' => $imagePath,
             'description' => $validated['description'] ?? null,
             'views' => $validated['views'] ?? 0,
             'is_popular' => isset($validated['is_popular']) ? (int) $validated['is_popular'] : 0,
