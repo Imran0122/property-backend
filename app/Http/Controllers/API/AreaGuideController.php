@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\City;
 use App\Models\Area;
 use App\Models\Society;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AreaGuideController extends Controller
 {
@@ -17,20 +19,14 @@ class AreaGuideController extends Controller
         $data = [];
 
         foreach ($cities as $city) {
-            $popular = Society::with([
-                    'city:id,name',
-                    'images:id,society_id,image,type,title,sort_order'
-                ])
+            $popular = Society::with(['city:id,name', 'images'])
                 ->where('city_id', $city->id)
                 ->where('is_popular', 1)
                 ->get()
                 ->map(fn($society) => $this->transformSocietyCard($society))
                 ->values();
 
-            $links = Society::with([
-                    'city:id,name',
-                    'images:id,society_id,image,type,title,sort_order'
-                ])
+            $links = Society::with(['city:id,name', 'images'])
                 ->where('city_id', $city->id)
                 ->get()
                 ->map(fn($society) => $this->transformSocietyCard($society))
@@ -49,10 +45,7 @@ class AreaGuideController extends Controller
 
     public function show($slug)
     {
-        $society = Society::with([
-                'city:id,name',
-                'images:id,society_id,image,type,title,sort_order'
-            ])
+        $society = Society::with(['city:id,name', 'images'])
             ->where('slug', $slug)
             ->orWhere('id', $slug)
             ->first();
@@ -101,13 +94,13 @@ class AreaGuideController extends Controller
 
     private function transformSocietyCard(Society $society): array
     {
-        $societyImage = $this->pickImage($society, [
-            'society',
+        $heroImage = $this->pickImage($society, [
             'cover',
-            'thumbnail',
             'hero',
             'main',
             'featured',
+            'society',
+            'thumbnail',
         ]);
 
         $mapImage = $this->pickImage($society, [
@@ -123,22 +116,22 @@ class AreaGuideController extends Controller
             'name' => $society->name,
             'city_name' => optional($society->city)->name,
             'description' => $society->description,
-            'image' => $societyImage?->image,
-            'image_path' => $societyImage?->image,
-            'map_image' => $mapImage?->image,
+            'image' => $heroImage ? $this->makeImageUrl($heroImage->image) : null,
+            'image_path' => $heroImage ? $this->makeImageUrl($heroImage->image) : null,
+            'map_image' => $mapImage ? $this->makeImageUrl($mapImage->image) : null,
             'views' => (int) ($society->views ?? 0),
         ];
     }
 
     private function transformSocietyDetail(Society $society): array
     {
-        $societyImage = $this->pickImage($society, [
-            'society',
+        $heroImage = $this->pickImage($society, [
             'cover',
-            'thumbnail',
             'hero',
             'main',
             'featured',
+            'society',
+            'thumbnail',
         ]);
 
         $mapImage = $this->pickImage($society, [
@@ -148,10 +141,10 @@ class AreaGuideController extends Controller
             'plan',
         ]);
 
-        $gallery = $society->images->map(function ($image) {
+        $gallery = collect($society->images)->map(function ($image) {
             return [
                 'id' => $image->id,
-                'image' => $image->image,
+                'image' => $this->makeImageUrl($image->image),
                 'type' => $image->type,
                 'title' => $image->title,
                 'sort_order' => (int) $image->sort_order,
@@ -164,8 +157,8 @@ class AreaGuideController extends Controller
             'name' => $society->name,
             'city_name' => optional($society->city)->name,
             'description' => $society->description,
-            'society_image' => $societyImage?->image,
-            'map_image' => $mapImage?->image,
+            'society_image' => $heroImage ? $this->makeImageUrl($heroImage->image) : null,
+            'map_image' => $mapImage ? $this->makeImageUrl($mapImage->image) : null,
             'gallery' => $gallery,
             'external_map_url' =>
                 $society->plot_finder_url ??
@@ -177,7 +170,7 @@ class AreaGuideController extends Controller
 
     private function pickImage(Society $society, array $preferredTypes = [])
     {
-        $images = $society->images ?? collect();
+        $images = collect($society->images);
 
         foreach ($preferredTypes as $type) {
             $match = $images->first(function ($img) use ($type) {
@@ -190,5 +183,34 @@ class AreaGuideController extends Controller
         }
 
         return $images->sortBy('sort_order')->first();
+    }
+
+    private function makeImageUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $clean = trim(str_replace('\\', '/', $path));
+
+        if (Str::startsWith($clean, ['http://', 'https://'])) {
+            return $clean;
+        }
+
+        $clean = ltrim($clean, '/');
+
+        if (Str::startsWith($clean, 'public/')) {
+            $clean = Str::after($clean, 'public/');
+        }
+
+        if (Str::startsWith($clean, 'storage/')) {
+            return url($clean);
+        }
+
+        if (Storage::disk('public')->exists($clean)) {
+            return Storage::disk('public')->url($clean);
+        }
+
+        return url($clean);
     }
 }
