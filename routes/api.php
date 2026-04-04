@@ -147,8 +147,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::get('home/projects', [HomeController::class, 'projects']);
 // Route::get('/popular-locations', [LocationController::class, 'popular']);
 // Route::get('/popular-locations', [LocationController::class, 'popularLocations']);
-Route::get('/area-guides',[AreaGuideController::class,'index']);
+// Route::get('/area-guides',[AreaGuideController::class,'index']);
 // Route::get('/most-viewed-societies', [AreaGuideController::class,'mostViewed']);
+Route::get('/area-guides', [AreaGuideController::class, 'index']);
+Route::get('/area-guides/{slug}', [AreaGuideController::class, 'show']);
+Route::get('/search-cities', [AreaGuideController::class, 'searchCities']);
 Route::get('/search-cities', [AreaGuideController::class,'searchCities']);
 // Route::get('/most-viewed-societies', [SocietyController::class, 'mostViewedSocieties']);
 Route::get('/most-viewed-societies', [MostViewedSocietyController::class, 'index']);
