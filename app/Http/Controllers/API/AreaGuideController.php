@@ -22,20 +22,24 @@ class AreaGuideController extends Controller
             $popular = Society::with(['city:id,name', 'images'])
                 ->where('city_id', $city->id)
                 ->where('is_popular', 1)
+                ->orderByDesc('views')
+                ->orderBy('name')
                 ->get()
-                ->map(fn($society) => $this->transformSocietyCard($society))
+                ->map(fn ($society) => $this->transformSocietyCard($society))
                 ->values();
 
             $links = Society::with(['city:id,name', 'images'])
                 ->where('city_id', $city->id)
+                ->orderByDesc('views')
+                ->orderBy('name')
                 ->get()
-                ->map(fn($society) => $this->transformSocietyCard($society))
+                ->map(fn ($society) => $this->transformSocietyCard($society))
                 ->values();
 
             if ($popular->isNotEmpty() || $links->isNotEmpty()) {
                 $data[$city->name] = [
                     'popular' => $popular,
-                    'links' => $links,
+                    'links'   => $links,
                 ];
             }
         }
@@ -52,14 +56,14 @@ class AreaGuideController extends Controller
 
         if (!$society) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Area guide not found',
             ], 404);
         }
 
         return response()->json([
             'status' => true,
-            'data' => $this->transformSocietyDetail($society),
+            'data'   => $this->transformSocietyDetail($society),
         ]);
     }
 
@@ -86,7 +90,7 @@ class AreaGuideController extends Controller
     {
         $search = $request->search;
 
-        $cities = City::where('name', 'LIKE', "%$search%")
+        $cities = City::where('name', 'LIKE', "%{$search}%")
             ->get(['id', 'name']);
 
         return response()->json($cities);
@@ -94,10 +98,8 @@ class AreaGuideController extends Controller
 
     private function transformSocietyCard(Society $society): array
     {
-        // Main / card image always prefer societies.image
-        $coverImage = $this->makeImageUrl($society->image);
+        $coverImage = $this->resolveSocietyCoverImage($society);
 
-        // Optional map image from society_images table
         $mapImageModel = $this->pickImage($society, [
             'society_map',
             'society-map',
@@ -110,21 +112,21 @@ class AreaGuideController extends Controller
         $mapImage = $mapImageModel ? $this->makeImageUrl($mapImageModel->image) : null;
 
         return [
-            'id' => $society->id,
-            'slug' => $society->slug,
-            'name' => $society->name,
-            'city_name' => optional($society->city)->name,
+            'id'          => $society->id,
+            'slug'        => $society->slug,
+            'name'        => $society->name,
+            'city_name'   => optional($society->city)->name,
             'description' => $society->description,
-            'image' => $coverImage,
-            'image_path' => $coverImage,
-            'map_image' => $mapImage,
-            'views' => (int) ($society->views ?? 0),
+            'image'       => $coverImage,
+            'image_path'  => $coverImage,
+            'map_image'   => $mapImage,
+            'views'       => (int) ($society->views ?? 0),
         ];
     }
 
     private function transformSocietyDetail(Society $society): array
     {
-        $coverImage = $this->makeImageUrl($society->image);
+        $coverImage = $this->resolveSocietyCoverImage($society);
 
         $mapImageModel = $this->pickImage($society, [
             'society_map',
@@ -139,42 +141,72 @@ class AreaGuideController extends Controller
 
         $gallery = collect($society->images)->map(function ($image) {
             return [
-                'id' => $image->id,
-                'image' => $this->makeImageUrl($image->image),
-                'type' => $image->type,
-                'title' => $image->title,
+                'id'         => $image->id,
+                'image'      => $this->makeImageUrl($image->image),
+                'type'       => $image->type,
+                'title'      => $image->title,
                 'sort_order' => (int) $image->sort_order,
             ];
-        })->values();
+        })->filter(fn ($item) => !empty($item['image']))
+          ->values();
 
-        // If no gallery image exists, at least add the main society image
         if ($gallery->isEmpty() && $coverImage) {
             $gallery = collect([
                 [
-                    'id' => null,
-                    'image' => $coverImage,
-                    'type' => 'cover',
-                    'title' => $society->name,
+                    'id'         => null,
+                    'image'      => $coverImage,
+                    'type'       => 'cover',
+                    'title'      => $society->name,
                     'sort_order' => 0,
-                ]
+                ],
             ]);
         }
 
         return [
-            'id' => $society->id,
-            'slug' => $society->slug,
-            'name' => $society->name,
-            'city_name' => optional($society->city)->name,
-            'description' => $society->description,
-            'society_image' => $coverImage,
-            'map_image' => $mapImage,
-            'gallery' => $gallery->values(),
+            'id'               => $society->id,
+            'slug'             => $society->slug,
+            'name'             => $society->name,
+            'city_name'        => optional($society->city)->name,
+            'description'      => $society->description,
+            'society_image'    => $coverImage,
+            'image'            => $coverImage,
+            'image_path'       => $coverImage,
+            'map_image'        => $mapImage,
+            'gallery'          => $gallery->values(),
             'external_map_url' =>
                 $society->plot_finder_url ??
                 $society->map_url ??
                 $society->google_map_url ??
                 $society->location_url,
         ];
+    }
+
+    private function resolveSocietyCoverImage(Society $society): ?string
+    {
+        // 1) Main image from societies table
+        if (!empty($society->image)) {
+            return $this->makeImageUrl($society->image);
+        }
+
+        // 2) Fallback image types from society_images table
+        $coverImageModel = $this->pickImage($society, [
+            'cover',
+            'hero',
+            'main',
+            'featured',
+            'society',
+            'thumbnail',
+            'photo',
+        ]);
+
+        if ($coverImageModel && !empty($coverImageModel->image)) {
+            return $this->makeImageUrl($coverImageModel->image);
+        }
+
+        // 3) Last fallback: any image from society_images
+        $firstImage = collect($society->images)->sortBy('sort_order')->first();
+
+        return $firstImage ? $this->makeImageUrl($firstImage->image) : null;
     }
 
     private function pickImage(Society $society, array $preferredTypes = [])
@@ -208,22 +240,28 @@ class AreaGuideController extends Controller
 
         $clean = ltrim($clean, '/');
 
-        // If DB saved "public/..." convert to storage path
         if (Str::startsWith($clean, 'public/')) {
             $clean = Str::after($clean, 'public/');
         }
 
-        // If already starts with storage/
+        $baseUrl = rtrim(config('app.url') ?: request()->getSchemeAndHttpHost(), '/');
+
+        // already /storage/...
         if (Str::startsWith($clean, 'storage/')) {
-            return url($clean);
+            return $baseUrl . '/' . $clean;
         }
 
-        // First try file in storage/app/public
+        // file exists in storage/app/public
         if (Storage::disk('public')->exists($clean)) {
-            return Storage::disk('public')->url($clean);
+            return $baseUrl . Storage::disk('public')->url($clean);
         }
 
-        // Fallback if file is directly under public folder like /societies/...
-        return url($clean);
+        // file exists directly in public folder
+        if (file_exists(public_path($clean))) {
+            return $baseUrl . '/' . $clean;
+        }
+
+        // common fallback for stored files like societies/abc.jpg
+        return $baseUrl . '/storage/' . $clean;
     }
 }
