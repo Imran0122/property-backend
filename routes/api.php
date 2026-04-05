@@ -152,8 +152,6 @@ Route::get('home/projects', [HomeController::class, 'projects']);
 Route::get('/area-guides', [AreaGuideController::class, 'index']);
 Route::get('/area-guides/{slug}', [AreaGuideController::class, 'show']);
 Route::get('/search-cities', [AreaGuideController::class, 'searchCities']);
-Route::get('/search-cities', [AreaGuideController::class,'searchCities']);
-// Route::get('/most-viewed-societies', [SocietyController::class, 'mostViewedSocieties']);
 Route::get('/most-viewed-societies', [MostViewedSocietyController::class, 'index']);
 Route::get('/society-maps', [SocietyMapController::class, 'index']);
 Route::get('/society-maps/city/{id}', [SocietyMapController::class, 'societiesByCity']);

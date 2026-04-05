@@ -10,6 +10,7 @@ class Society extends Model
         'city_id',
         'name',
         'slug',
+        'image',
         'description',
         'is_popular',
         'views',
