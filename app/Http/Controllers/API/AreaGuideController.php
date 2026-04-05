@@ -264,6 +264,7 @@
 
 
 
+
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -324,21 +325,25 @@ class AreaGuideController extends Controller
             ], 404);
         }
 
-        $relatedSocieties = Society::with(['city:id,name', 'images'])
+        $citySocieties = Society::with(['city:id,name', 'images'])
             ->where('city_id', $society->city_id)
-            ->where('id', '!=', $society->id)
             ->orderByDesc('is_popular')
             ->orderByDesc('views')
             ->orderBy('name')
-            ->take(8)
+            ->take(18)
             ->get()
             ->map(fn ($item) => $this->transformSocietyCard($item))
+            ->values();
+
+        $relatedSocieties = $citySocieties
+            ->reject(fn ($item) => (int) ($item['id'] ?? 0) === (int) $society->id)
             ->values();
 
         return response()->json([
             'status' => true,
             'data'   => [
                 ...$this->transformSocietyDetail($society),
+                'city_societies'    => $citySocieties,
                 'related_societies' => $relatedSocieties,
                 'nearby_societies'  => $relatedSocieties->pluck('name')->values(),
             ],
@@ -425,27 +430,27 @@ class AreaGuideController extends Controller
         $gallery = $this->buildGallery($society, $coverImage);
 
         return [
-            'id'               => $society->id,
-            'slug'             => $society->slug,
-            'name'             => $society->name,
-            'city_name'        => optional($society->city)->name,
-            'description'      => $society->description,
-            'society_image'    => $coverImage,
-            'society_image_url'=> $coverImage,
-            'image'            => $coverImage,
-            'image_url'        => $coverImage,
-            'image_path'       => $coverImage,
-            'map_image'        => $mapImage,
-            'map_image_url'    => $mapImage,
-            'gallery'          => $gallery,
-            'external_map_url' =>
+            'id'                => $society->id,
+            'slug'              => $society->slug,
+            'name'              => $society->name,
+            'city_name'         => optional($society->city)->name,
+            'description'       => $society->description,
+            'society_image'     => $coverImage,
+            'society_image_url' => $coverImage,
+            'image'             => $coverImage,
+            'image_url'         => $coverImage,
+            'image_path'        => $coverImage,
+            'map_image'         => $mapImage,
+            'map_image_url'     => $mapImage,
+            'gallery'           => $gallery,
+            'external_map_url'  =>
                 $society->plot_finder_url ??
                 $society->map_url ??
                 $society->google_map_url ??
                 $society->location_url,
-            'house_sale_range' => $society->house_sale_range ?? null,
-            'plot_sale_range'  => $society->plot_sale_range ?? null,
-            'house_rent_range' => $society->house_rent_range ?? null,
+            'house_sale_range'  => $society->house_sale_range ?? null,
+            'plot_sale_range'   => $society->plot_sale_range ?? null,
+            'house_rent_range'  => $society->house_rent_range ?? null,
         ];
     }
 
