@@ -20,6 +20,11 @@ class Society extends Model
         'location_url',
     ];
 
+    protected $casts = [
+        'is_popular' => 'boolean',
+        'views' => 'integer',
+    ];
+
     public function city()
     {
         return $this->belongsTo(City::class, 'city_id');
