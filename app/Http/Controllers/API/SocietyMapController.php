@@ -40,9 +40,11 @@ class SocietyMapController extends Controller
                         'societies_count' => (int) $city->societies_count,
                     ];
                 })->values(),
+
                 'featured_societies' => $featured->map(function ($society) {
                     return $this->transformSocietyCard($society);
                 })->values(),
+
                 'societies' => $featured->map(function ($society) {
                     return $this->transformSocietyCard($society);
                 })->values(),
