@@ -18,11 +18,17 @@ class Society extends Model
         'map_url',
         'google_map_url',
         'location_url',
+        'latitude',
+        'longitude',
+        'map_zoom',
     ];
 
     protected $casts = [
         'is_popular' => 'boolean',
         'views' => 'integer',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'map_zoom' => 'integer',
     ];
 
     public function city()

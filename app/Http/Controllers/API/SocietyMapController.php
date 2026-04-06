@@ -173,6 +173,10 @@ class SocietyMapController extends Controller
             'map_image' => $societyMapImage,
             'map_view_image' => $mapViewImage,
 
+'latitude' => $society->latitude,
+'longitude' => $society->longitude,
+'map_zoom' => (int) ($society->map_zoom ?? 14),
+
             'views' => (int) ($society->views ?? 0),
             'plot_finder_url' => $society->plot_finder_url,
             'map_url' => $society->map_url,
@@ -254,7 +258,9 @@ class SocietyMapController extends Controller
             'map_view_image' => $mapViewImage,
 
             'gallery' => $gallery,
-
+'latitude' => $society->latitude,
+'longitude' => $society->longitude,
+'map_zoom' => (int) ($society->map_zoom ?? 14),
             'external_map_url' =>
                 $society->plot_finder_url
                 ?: $society->map_url
