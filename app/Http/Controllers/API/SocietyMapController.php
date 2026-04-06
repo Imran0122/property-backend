@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Society;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -12,18 +13,17 @@ class SocietyMapController extends Controller
 {
     public function index()
     {
-        $cities = City::withCount('societies')
+        $cities = City::query()
+            ->withCount([
+                'societies as societies_count' => function (Builder $query) {
+                    $this->applyRenderableSocietyConstraint($query);
+                },
+            ])
             ->having('societies_count', '>', 0)
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $featured = Society::with([
-                'city:id,name',
-                'images' => function ($q) {
-                    $q->orderBy('sort_order')->orderBy('id');
-                },
-            ])
-            ->whereHas('city')
+        $featured = $this->societyListingQuery()
             ->orderByDesc('is_popular')
             ->orderByDesc('views')
             ->orderBy('name')
@@ -54,12 +54,7 @@ class SocietyMapController extends Controller
 
     public function societiesByCity($id)
     {
-        $societies = Society::with([
-                'city:id,name',
-                'images' => function ($q) {
-                    $q->orderBy('sort_order')->orderBy('id');
-                },
-            ])
+        $societies = $this->societyListingQuery()
             ->where('city_id', $id)
             ->orderByDesc('is_popular')
             ->orderByDesc('views')
@@ -82,12 +77,24 @@ class SocietyMapController extends Controller
                     $q->orderBy('sort_order')->orderBy('id');
                 },
             ])
-            ->where('slug', $slug)
-            ->orWhere('id', $slug)
+            ->where(function (Builder $query) use ($slug) {
+                $query->where('slug', $slug);
+
+                if (is_numeric($slug)) {
+                    $query->orWhere('id', (int) $slug);
+                }
+            })
             ->firstOrFail();
 
         $society->increment('views');
-        $society->refresh();
+
+        $society = Society::with([
+                'city:id,name',
+                'images' => function ($q) {
+                    $q->orderBy('sort_order')->orderBy('id');
+                },
+            ])
+            ->findOrFail($society->id);
 
         return response()->json([
             'status' => true,
@@ -95,10 +102,42 @@ class SocietyMapController extends Controller
         ]);
     }
 
+    private function societyListingQuery(): Builder
+    {
+        return Society::query()
+            ->with([
+                'city:id,name',
+                'images' => function ($q) {
+                    $q->orderBy('sort_order')->orderBy('id');
+                },
+            ])
+            ->whereHas('city')
+            ->where(function (Builder $query) {
+                $query->where(function (Builder $ownImageQuery) {
+                    $ownImageQuery->whereNotNull('image')
+                        ->where('image', '!=', '');
+                })->orWhereHas('images', function (Builder $imageQuery) {
+                    $imageQuery->whereNotNull('image')
+                        ->where('image', '!=', '');
+                });
+            });
+    }
+
+    private function applyRenderableSocietyConstraint(Builder $query): void
+    {
+        $query->where(function (Builder $innerQuery) {
+            $innerQuery->where(function (Builder $ownImageQuery) {
+                $ownImageQuery->whereNotNull('image')
+                    ->where('image', '!=', '');
+            })->orWhereHas('images', function (Builder $imageQuery) {
+                $imageQuery->whereNotNull('image')
+                    ->where('image', '!=', '');
+            });
+        });
+    }
+
     private function transformSocietyCard(Society $society): array
     {
-        $coverImage = $this->resolveSocietyCoverImage($society);
-
         $societyMapImage = $this->resolveTypedImageUrl($society, [
             'society_map',
             'society-map',
@@ -116,6 +155,8 @@ class SocietyMapController extends Controller
             'explore',
         ]);
 
+        $coverImage = $societyMapImage ?: $this->resolveSocietyCoverImage($society) ?: $mapViewImage;
+
         return [
             'id' => $society->id,
             'slug' => $society->slug,
@@ -123,12 +164,15 @@ class SocietyMapController extends Controller
             'city_id' => $society->city_id,
             'city_name' => optional($society->city)->name,
             'description' => $society->description,
+
             'image' => $coverImage,
             'image_url' => $coverImage,
             'image_path' => $coverImage,
-            'society_image' => $coverImage,
+            'society_image' => $societyMapImage ?: $coverImage,
+
             'map_image' => $societyMapImage,
             'map_view_image' => $mapViewImage,
+
             'views' => (int) ($society->views ?? 0),
             'plot_finder_url' => $society->plot_finder_url,
             'map_url' => $society->map_url,
@@ -139,8 +183,6 @@ class SocietyMapController extends Controller
 
     private function transformSocietyDetail(Society $society): array
     {
-        $coverImage = $this->resolveSocietyCoverImage($society);
-
         $societyMapImage = $this->resolveTypedImageUrl($society, [
             'society_map',
             'society-map',
@@ -158,7 +200,16 @@ class SocietyMapController extends Controller
             'explore',
         ]);
 
+        $coverImage = $societyMapImage ?: $this->resolveSocietyCoverImage($society) ?: $mapViewImage;
+
         $gallery = collect($society->images)
+            ->sortBy(function ($image) {
+                return sprintf(
+                    '%09d-%09d',
+                    (int) ($image->sort_order ?? 0),
+                    (int) ($image->id ?? 0)
+                );
+            })
             ->map(function ($image) {
                 return [
                     'id' => $image->id,
@@ -192,7 +243,9 @@ class SocietyMapController extends Controller
             'description' => $society->description,
             'views' => (int) ($society->views ?? 0),
 
-            'society_image' => $coverImage,
+            'cover_image' => $coverImage,
+            'society_image' => $societyMapImage ?: $coverImage,
+
             'image' => $coverImage,
             'image_url' => $coverImage,
             'image_path' => $coverImage,
@@ -239,7 +292,15 @@ class SocietyMapController extends Controller
             return $this->makeImageUrl($preferred->image);
         }
 
-        $firstImage = collect($society->images)->sortBy('sort_order')->first();
+        $firstImage = collect($society->images)
+            ->sortBy(function ($image) {
+                return sprintf(
+                    '%09d-%09d',
+                    (int) ($image->sort_order ?? 0),
+                    (int) ($image->id ?? 0)
+                );
+            })
+            ->first();
 
         return $firstImage ? $this->makeImageUrl($firstImage->image) : null;
     }
@@ -257,11 +318,26 @@ class SocietyMapController extends Controller
 
     private function pickImage(Society $society, array $preferredTypes = [])
     {
-        $images = collect($society->images);
+        $images = collect($society->images)
+            ->sortBy(function ($image) {
+                return sprintf(
+                    '%09d-%09d',
+                    (int) ($image->sort_order ?? 0),
+                    (int) ($image->id ?? 0)
+                );
+            });
 
-        foreach ($preferredTypes as $type) {
+        $normalizedPreferred = collect($preferredTypes)
+            ->map(fn ($type) => strtolower(str_replace('-', '_', trim((string) $type))))
+            ->values();
+
+        foreach ($normalizedPreferred as $type) {
             $match = $images->first(function ($img) use ($type) {
-                return strtolower((string) $img->type) === strtolower($type);
+                $currentType = strtolower(
+                    str_replace('-', '_', trim((string) ($img->type ?? '')))
+                );
+
+                return $currentType === $type && !empty($img->image);
             });
 
             if ($match) {
@@ -269,7 +345,7 @@ class SocietyMapController extends Controller
             }
         }
 
-        return null;
+        return $images->first(fn ($img) => !empty($img->image));
     }
 
     private function makeImageUrl(?string $path): ?string
@@ -290,20 +366,18 @@ class SocietyMapController extends Controller
             $clean = Str::after($clean, 'public/');
         }
 
-        $baseUrl = rtrim(config('app.url') ?: request()->getSchemeAndHttpHost(), '/');
-
         if (Str::startsWith($clean, 'storage/')) {
-            return $baseUrl . '/' . $clean;
+            return url($clean);
         }
 
         if (Storage::disk('public')->exists($clean)) {
-            return $baseUrl . Storage::disk('public')->url($clean);
+            return url(Storage::disk('public')->url($clean));
         }
 
         if (file_exists(public_path($clean))) {
-            return $baseUrl . '/' . $clean;
+            return url($clean);
         }
 
-        return $baseUrl . '/storage/' . $clean;
+        return url('storage/' . $clean);
     }
 }
