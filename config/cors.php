@@ -1,24 +1,14 @@
 <?php
 
+
 return [
 
-    'paths' => [
-        'api/*',
-        'sanctum/csrf-cookie',
-        'properties*',
-        'properties/*',
-        'blogs',
-        'blogs/*',
-        'login',
-        'logout',
-        'register',
-    ],
+    'paths' => ['*'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://test-website-sable-ten.vercel.app',
-        'https://test-website-azcz.vercel.app',
+        'https://demo.tokyodomesticmarket.com',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
     ],
@@ -34,6 +24,13 @@ return [
     'supports_credentials' => true,
 
 ];
+
+
+
+
+
+
+
 
 
 
