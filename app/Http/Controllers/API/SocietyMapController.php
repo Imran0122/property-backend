@@ -147,16 +147,6 @@ class SocietyMapController extends Controller
             'plan',
         ]);
 
-        $mapViewImage = $this->resolveTypedImageUrl($society, [
-            'map_view',
-            'map-view',
-            'view',
-            'location',
-            'explore',
-        ]);
-
-        $coverImage = $societyMapImage ?: $this->resolveSocietyCoverImage($society) ?: $mapViewImage;
-
         return [
             'id' => $society->id,
             'slug' => $society->slug,
@@ -164,24 +154,20 @@ class SocietyMapController extends Controller
             'city_id' => $society->city_id,
             'city_name' => optional($society->city)->name,
             'description' => $society->description,
-
-            'image' => $coverImage,
-            'image_url' => $coverImage,
-            'image_path' => $coverImage,
-            'society_image' => $societyMapImage ?: $coverImage,
-
+            'image' => $societyMapImage,
+            'image_url' => $societyMapImage,
+            'image_path' => $societyMapImage,
+            'society_image' => $societyMapImage,
             'map_image' => $societyMapImage,
-            'map_view_image' => $mapViewImage,
-
-'latitude' => $society->latitude,
-'longitude' => $society->longitude,
-'map_zoom' => (int) ($society->map_zoom ?? 14),
-
+            'map_view_image' => null,
             'views' => (int) ($society->views ?? 0),
             'plot_finder_url' => $society->plot_finder_url,
             'map_url' => $society->map_url,
             'google_map_url' => $society->google_map_url,
             'location_url' => $society->location_url,
+            'latitude' => $society->latitude,
+            'longitude' => $society->longitude,
+            'map_zoom' => (int) ($society->map_zoom ?? 14),
         ];
     }
 
@@ -195,16 +181,6 @@ class SocietyMapController extends Controller
             'master-plan',
             'plan',
         ]);
-
-        $mapViewImage = $this->resolveTypedImageUrl($society, [
-            'map_view',
-            'map-view',
-            'view',
-            'location',
-            'explore',
-        ]);
-
-        $coverImage = $societyMapImage ?: $this->resolveSocietyCoverImage($society) ?: $mapViewImage;
 
         $gallery = collect($society->images)
             ->sortBy(function ($image) {
@@ -226,18 +202,6 @@ class SocietyMapController extends Controller
             ->filter(fn ($item) => !empty($item['image']))
             ->values();
 
-        if ($gallery->isEmpty() && $coverImage) {
-            $gallery = collect([
-                [
-                    'id' => null,
-                    'type' => 'cover',
-                    'title' => $society->name,
-                    'sort_order' => 0,
-                    'image' => $coverImage,
-                ],
-            ]);
-        }
-
         return [
             'id' => $society->id,
             'slug' => $society->slug,
@@ -246,69 +210,27 @@ class SocietyMapController extends Controller
             'city_name' => optional($society->city)->name,
             'description' => $society->description,
             'views' => (int) ($society->views ?? 0),
-
-            'cover_image' => $coverImage,
-            'society_image' => $societyMapImage ?: $coverImage,
-
-            'image' => $coverImage,
-            'image_url' => $coverImage,
-            'image_path' => $coverImage,
-
+            'cover_image' => $societyMapImage,
+            'society_image' => $societyMapImage,
+            'image' => $societyMapImage,
+            'image_url' => $societyMapImage,
+            'image_path' => $societyMapImage,
             'map_image' => $societyMapImage,
-            'map_view_image' => $mapViewImage,
-
+            'map_view_image' => null,
             'gallery' => $gallery,
-'latitude' => $society->latitude,
-'longitude' => $society->longitude,
-'map_zoom' => (int) ($society->map_zoom ?? 14),
             'external_map_url' =>
                 $society->plot_finder_url
                 ?: $society->map_url
                 ?: $society->google_map_url
                 ?: $society->location_url,
-
             'plot_finder_url' => $society->plot_finder_url,
             'map_url' => $society->map_url,
             'google_map_url' => $society->google_map_url,
             'location_url' => $society->location_url,
+            'latitude' => $society->latitude,
+            'longitude' => $society->longitude,
+            'map_zoom' => (int) ($society->map_zoom ?? 14),
         ];
-    }
-
-    private function resolveSocietyCoverImage(Society $society): ?string
-    {
-        if (!empty($society->image)) {
-            return $this->makeImageUrl($society->image);
-        }
-
-        $preferred = $this->pickImage($society, [
-            'cover',
-            'hero',
-            'main',
-            'featured',
-            'thumbnail',
-            'photo',
-            'gallery',
-            'society_map',
-            'society-map',
-            'map_view',
-            'map-view',
-        ]);
-
-        if ($preferred && !empty($preferred->image)) {
-            return $this->makeImageUrl($preferred->image);
-        }
-
-        $firstImage = collect($society->images)
-            ->sortBy(function ($image) {
-                return sprintf(
-                    '%09d-%09d',
-                    (int) ($image->sort_order ?? 0),
-                    (int) ($image->id ?? 0)
-                );
-            })
-            ->first();
-
-        return $firstImage ? $this->makeImageUrl($firstImage->image) : null;
     }
 
     private function resolveTypedImageUrl(Society $society, array $types = []): ?string
