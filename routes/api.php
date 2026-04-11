@@ -83,7 +83,7 @@ Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
 
 Route::get('/properties/search', [PropertyController::class, 'searchApi']);
 Route::get('/properties/filter', [PropertyController::class, 'filter']);
-Route::get('/projects', [ProjectController::class, 'index']);
+
 
 Route::get('/property-types', [PropertyController::class, 'getTypes']);
 Route::get('/property-subtypes/{type_id}', [PropertyController::class, 'getSubTypes']);
@@ -100,8 +100,15 @@ Route::get('/agencies/{id}', [AgencyController::class, 'show']);
 Route::get('/popular-locations', [PopularLocationController::class, 'index']);
 Route::get('/browse-cities', [BrowseCityController::class, 'index']);
 Route::get('/viewed-properties', [ViewedPropertyController::class, 'index']);
-Route::get('/projects/trending', [ProjectController::class, 'trending']);
+
 Route::get('/home/blogs', [HomeController::class, 'homeBlogs']);
+
+Route::get('/projects/meta', [ProjectController::class, 'meta']);
+Route::get('/projects', [ProjectController::class, 'index']);
+Route::get('/projects/trending', [ProjectController::class, 'trending']);
+Route::get('/projects/{slug}', [ProjectController::class, 'show']);
+
+
 
 Route::get('/community/blogs', [BlogController::class, 'index']);
 Route::get('/blogs', [BlogController::class, 'index']);
