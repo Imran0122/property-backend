@@ -56,6 +56,7 @@ use App\Http\Controllers\API\SettingsController;
 use App\Http\Controllers\API\PropertyBoutiqueController;
 use App\Http\Controllers\API\Admin\AdminSocietyController;
 use App\Http\Controllers\API\Admin\AdminSocietyMapController;
+use App\Http\Controllers\API\Admin\AdminProjectController;
 // use App\Http\Controllers\API\LocationController;
 
 // use App\Http\Controllers\Api\HomeController;
@@ -402,6 +403,18 @@ Route::post('society-maps', [AdminSocietyMapController::class, 'store']);
 Route::get('society-maps/{id}', [AdminSocietyMapController::class, 'show'])->whereNumber('id');
 Route::put('society-maps/{id}', [AdminSocietyMapController::class, 'update'])->whereNumber('id');
 Route::delete('society-maps/{id}', [AdminSocietyMapController::class, 'destroy'])->whereNumber('id');
+
+
+    // Projects Management
+    Route::get('projects/meta', [AdminProjectController::class, 'meta']);
+    Route::get('projects', [AdminProjectController::class, 'index']);
+    Route::get('projects/{id}', [AdminProjectController::class, 'show'])->whereNumber('id');
+    Route::post('projects', [AdminProjectController::class, 'store']);
+    Route::post('projects/{id}', [AdminProjectController::class, 'update'])->whereNumber('id');
+    Route::delete('projects/{id}', [AdminProjectController::class, 'destroy'])->whereNumber('id');
+    Route::post('projects/{id}/toggle-featured', [AdminProjectController::class, 'toggleFeatured'])->whereNumber('id');
+    Route::post('projects/{id}/status', [AdminProjectController::class, 'updateStatus'])->whereNumber('id');
+
 
 });
 
