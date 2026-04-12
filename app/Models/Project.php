@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class Project extends Model
 {
@@ -23,7 +21,13 @@ class Project extends Model
         'is_featured',
     ];
 
-    protected $appends = ['cover_image_url'];
+    protected $casts = [
+        'is_featured' => 'boolean',
+    ];
+
+    protected $appends = [
+        'cover_image_url',
+    ];
 
     public function city()
     {
@@ -37,20 +41,14 @@ class Project extends Model
 
     public function getCoverImageUrlAttribute()
     {
-        $value = $this->cover_image;
-
-        if (!$value) {
+        if (!$this->cover_image) {
             return null;
         }
 
-        if (Str::startsWith($value, ['http://', 'https://'])) {
-            return $value;
+        if (preg_match('/^https?:\/\//i', $this->cover_image)) {
+            return $this->cover_image;
         }
 
-        if (Str::startsWith($value, ['/storage/', 'storage/'])) {
-            return url('/' . ltrim($value, '/'));
-        }
-
-        return Storage::disk('public')->url($value);
+        return asset('storage/' . ltrim($this->cover_image, '/'));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\City;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ class ProjectController extends Controller
         $projects = Project::with(['city:id,name', 'units'])->latest()->get();
 
         $cities = $projects
-            ->filter(fn($project) => $project->city)
+            ->filter(fn ($project) => $project->city)
             ->groupBy('city_id')
             ->map(function ($items) {
                 $first = $items->first();
@@ -30,10 +31,10 @@ class ProjectController extends Controller
             ->values();
 
         $categories = collect([
-            ['key' => 'apartments', 'label' => 'Appartements'],
-            ['key' => 'grounds', 'label' => 'Terrains'],
-            ['key' => 'shops', 'label' => 'Boutiques'],
-            ['key' => 'houses', 'label' => 'Maisons'],
+            ['key' => 'apartments', 'label' => 'Apartments'],
+            ['key' => 'grounds', 'label' => 'Grounds'],
+            ['key' => 'shops', 'label' => 'Shops'],
+            ['key' => 'houses', 'label' => 'Houses'],
         ])->map(function ($category) use ($projects) {
             $count = $projects->filter(function ($project) use ($category) {
                 return $project->units->contains(function ($unit) use ($category) {
@@ -49,8 +50,8 @@ class ProjectController extends Controller
         })->values();
 
         $developers = $projects
-            ->filter(fn($project) => filled($project->developer))
-            ->groupBy(fn($project) => Str::lower(trim((string) $project->developer)))
+            ->filter(fn ($project) => filled($project->developer))
+            ->groupBy(fn ($project) => Str::lower(trim((string) $project->developer)))
             ->map(function ($items) {
                 $first = $items->first();
 
@@ -62,26 +63,27 @@ class ProjectController extends Controller
                 ];
             })
             ->sortByDesc('projects_count')
+            ->take(10)
             ->values();
 
-        $allPrices = $projects->flatMap(fn($project) => $project->units->pluck('price'))->filter();
-        $allAreas = $projects->flatMap(fn($project) => $project->units->pluck('area'))->filter();
+        $allUnitPrices = $projects->flatMap(fn ($project) => $project->units->pluck('price'))->filter(fn ($value) => !is_null($value));
+        $allUnitAreas = $projects->flatMap(fn ($project) => $project->units->pluck('area'))->filter(fn ($value) => !is_null($value));
 
         return response()->json([
             'success' => true,
             'data' => [
                 'cities' => $cities,
                 'categories' => $categories,
-                'developers' => $developers->pluck('name')->values(),
-                'featured_developers' => $developers->take(10)->values(),
+                'developers' => $developers->pluck('name')->filter()->values(),
+                'featured_developers' => $developers,
                 'ranges' => [
                     'price' => [
-                        'min' => $allPrices->count() ? (float) $allPrices->min() : 0,
-                        'max' => $allPrices->count() ? (float) $allPrices->max() : 0,
+                        'min' => $allUnitPrices->count() ? (float) $allUnitPrices->min() : 0,
+                        'max' => $allUnitPrices->count() ? (float) $allUnitPrices->max() : 0,
                     ],
                     'area' => [
-                        'min' => $allAreas->count() ? (float) $allAreas->min() : 0,
-                        'max' => $allAreas->count() ? (float) $allAreas->max() : 0,
+                        'min' => $allUnitAreas->count() ? (float) $allUnitAreas->min() : 0,
+                        'max' => $allUnitAreas->count() ? (float) $allUnitAreas->max() : 0,
                     ],
                 ],
             ],
@@ -94,11 +96,20 @@ class ProjectController extends Controller
         $perPage = $perPage < 1 ? 12 : $perPage;
         $perPage = $perPage > 50 ? 50 : $perPage;
 
+        $search = trim((string) $request->query('search', ''));
+        $cityId = $request->query('city_id');
+        $developer = trim((string) $request->query('developer', ''));
+        $status = trim((string) $request->query('status', ''));
+        $category = trim((string) $request->query('category', ''));
+        $minPrice = $request->query('min_price');
+        $maxPrice = $request->query('max_price');
+        $minArea = $request->query('min_area');
+        $maxArea = $request->query('max_area');
+        $featured = $request->query('featured');
+
         $query = Project::with(['city:id,name', 'units'])->latest();
 
-        if ($request->filled('search')) {
-            $search = trim((string) $request->search);
-
+        if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('developer', 'like', "%{$search}%")
@@ -107,68 +118,57 @@ class ProjectController extends Controller
             });
         }
 
-        if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
+        if (!empty($cityId)) {
+            $query->where('city_id', $cityId);
         }
 
-        if ($request->filled('developer')) {
-            $developer = trim((string) $request->developer);
+        if ($developer !== '') {
             $query->where('developer', 'like', "%{$developer}%");
         }
 
-        if ($request->filled('featured')) {
-            $featured = $request->featured;
-            if ($featured === '1' || $featured === 1) {
-                $query->where('is_featured', 1);
-            }
-            if ($featured === '0' || $featured === 0) {
-                $query->where('is_featured', 0);
-            }
+        if ($status !== '' && $status !== 'all') {
+            $query->where('status', $status);
         }
 
-        if ($request->filled('category')) {
-            $types = $this->categoryTypes($request->category);
+        if ($featured !== null && $featured !== '' && $featured !== 'all') {
+            $query->where('is_featured', (int) $featured === 1 ? 1 : 0);
+        }
 
-            if (!empty($types)) {
-                $query->whereHas('units', function ($q) use ($types) {
-                    $q->where(function ($sub) use ($types) {
-                        foreach ($types as $index => $type) {
-                            if ($index === 0) {
-                                $sub->whereRaw('LOWER(type) LIKE ?', ['%' . Str::lower($type) . '%']);
-                            } else {
-                                $sub->orWhereRaw('LOWER(type) LIKE ?', ['%' . Str::lower($type) . '%']);
-                            }
+        if ($category !== '') {
+            $allowedTypes = $this->categoryTypes($category);
+
+            if (!empty($allowedTypes)) {
+                $query->whereHas('units', function ($q) use ($allowedTypes) {
+                    foreach ($allowedTypes as $index => $type) {
+                        if ($index === 0) {
+                            $q->whereRaw('LOWER(type) like ?', ['%' . Str::lower($type) . '%']);
+                        } else {
+                            $q->orWhereRaw('LOWER(type) like ?', ['%' . Str::lower($type) . '%']);
                         }
-                    });
+                    }
                 });
             }
         }
 
-        if ($request->filled('min_price')) {
-            $minPrice = (float) $request->min_price;
-            $query->whereHas('units', fn($q) => $q->where('price', '>=', $minPrice));
+        if ($minPrice !== null && $minPrice !== '') {
+            $query->whereHas('units', fn ($q) => $q->where('price', '>=', $minPrice));
         }
 
-        if ($request->filled('max_price')) {
-            $maxPrice = (float) $request->max_price;
-            $query->whereHas('units', fn($q) => $q->where('price', '<=', $maxPrice));
+        if ($maxPrice !== null && $maxPrice !== '') {
+            $query->whereHas('units', fn ($q) => $q->where('price', '<=', $maxPrice));
         }
 
-        if ($request->filled('min_area')) {
-            $minArea = (float) $request->min_area;
-            $query->whereHas('units', fn($q) => $q->where('area', '>=', $minArea));
+        if ($minArea !== null && $minArea !== '') {
+            $query->whereHas('units', fn ($q) => $q->where('area', '>=', $minArea));
         }
 
-        if ($request->filled('max_area')) {
-            $maxArea = (float) $request->max_area;
-            $query->whereHas('units', fn($q) => $q->where('area', '<=', $maxArea));
+        if ($maxArea !== null && $maxArea !== '') {
+            $query->whereHas('units', fn ($q) => $q->where('area', '<=', $maxArea));
         }
 
         $projects = $query->paginate($perPage)->withQueryString();
 
-        $list = $projects->getCollection()
-            ->map(fn($project) => $this->formatProjectCard($project))
-            ->values();
+        $list = $projects->getCollection()->map(fn ($project) => $this->formatProjectCard($project))->values();
 
         return response()->json([
             'success' => true,
@@ -188,15 +188,15 @@ class ProjectController extends Controller
 
     public function trending(Request $request)
     {
-        $limit = (int) $request->query('limit', 10);
-        $limit = $limit < 1 ? 10 : $limit;
+        $limit = (int) $request->query('limit', 8);
+        $limit = $limit < 1 ? 8 : $limit;
 
         $projects = Project::with(['city:id,name', 'units'])
             ->orderByDesc('is_featured')
             ->latest()
             ->take($limit)
             ->get()
-            ->map(fn($project) => $this->formatProjectCard($project))
+            ->map(fn ($project) => $this->formatProjectCard($project))
             ->values();
 
         return response()->json([
@@ -219,18 +219,17 @@ class ProjectController extends Controller
             ], 404);
         }
 
-        $prices = $project->units->pluck('price')->filter();
-        $areas = $project->units->pluck('area')->filter();
+        $prices = $project->units->pluck('price')->filter(fn ($value) => !is_null($value));
+        $areas = $project->units->pluck('area')->filter(fn ($value) => !is_null($value));
 
         $unitGroups = $project->units
-            ->groupBy(fn($unit) => $unit->type ?: 'Unit')
+            ->groupBy(fn ($unit) => $unit->type ?: 'Unit')
             ->map(function ($units, $type) {
-                $unitPrices = $units->pluck('price')->filter();
-                $unitAreas = $units->pluck('area')->filter();
+                $unitPrices = $units->pluck('price')->filter(fn ($value) => !is_null($value));
+                $unitAreas = $units->pluck('area')->filter(fn ($value) => !is_null($value));
 
                 return [
                     'type' => $type,
-                    'count' => $units->count(),
                     'price_range_label' => $this->makeRangeLabel($unitPrices, 'MAD'),
                     'area_range_label' => $this->makeRangeLabel($unitAreas, 'm²', false),
                     'items' => $units->map(function ($unit) {
@@ -277,14 +276,18 @@ class ProjectController extends Controller
                     'status' => $project->status,
                     'units_count' => $project->units->count(),
                 ],
+                'contact' => [
+                    'developer' => $project->developer,
+                    'city' => $project->city?->name,
+                ],
             ],
         ]);
     }
 
     private function formatProjectCard(Project $project): array
     {
-        $prices = $project->units->pluck('price')->filter();
-        $areas = $project->units->pluck('area')->filter();
+        $prices = $project->units->pluck('price')->filter(fn ($value) => !is_null($value));
+        $areas = $project->units->pluck('area')->filter(fn ($value) => !is_null($value));
         $types = $project->units->pluck('type')->filter()->unique()->values();
 
         return [
@@ -300,25 +303,36 @@ class ProjectController extends Controller
             'cover_image_url' => $project->cover_image_url,
             'units_count' => $project->units->count(),
             'type_labels' => $types,
+            'price_min' => $prices->count() ? (float) $prices->min() : null,
+            'price_max' => $prices->count() ? (float) $prices->max() : null,
+            'area_min' => $areas->count() ? (float) $areas->min() : null,
+            'area_max' => $areas->count() ? (float) $areas->max() : null,
             'price_range_label' => $this->makeRangeLabel($prices, 'MAD'),
             'area_range_label' => $this->makeRangeLabel($areas, 'm²', false),
         ];
     }
 
-    private function makeRangeLabel(Collection $values, string $suffix = '', bool $prefix = true): ?string
+    private function makeRangeLabel(Collection $values, string $suffix = '', bool $suffixBefore = true): ?string
     {
         if ($values->isEmpty()) {
             return null;
         }
 
-        $min = number_format((float) $values->min(), 0, '.', ',');
-        $max = number_format((float) $values->max(), 0, '.', ',');
+        $min = $values->min();
+        $max = $values->max();
 
-        if ($prefix) {
-            return $min === $max ? "{$suffix} {$min}" : "{$suffix} {$min} to {$max}";
+        $minText = number_format((float) $min, 0, '.', ',');
+        $maxText = number_format((float) $max, 0, '.', ',');
+
+        if ($suffixBefore) {
+            return $min == $max
+                ? "{$suffix} {$minText}"
+                : "{$suffix} {$minText} to {$maxText}";
         }
 
-        return $min === $max ? "{$min} {$suffix}" : "{$min} to {$max} {$suffix}";
+        return $min == $max
+            ? "{$minText} {$suffix}"
+            : "{$minText} to {$maxText} {$suffix}";
     }
 
     private function resolveUnitCategory(?string $type): string
@@ -328,8 +342,8 @@ class ProjectController extends Controller
         if (
             str_contains($type, 'apartment') ||
             str_contains($type, 'studio') ||
-            str_contains($type, 'flat') ||
-            str_contains($type, 'penthouse')
+            str_contains($type, 'penthouse') ||
+            str_contains($type, 'flat')
         ) {
             return 'apartments';
         }
@@ -359,7 +373,7 @@ class ProjectController extends Controller
     private function categoryTypes(string $category): array
     {
         return match ($category) {
-            'apartments' => ['apartment', 'studio', 'flat', 'penthouse'],
+            'apartments' => ['apartment', 'studio', 'penthouse', 'flat'],
             'grounds' => ['plot', 'ground', 'land'],
             'shops' => ['shop'],
             'houses' => ['house', 'villa'],
