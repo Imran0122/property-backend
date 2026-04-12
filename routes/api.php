@@ -57,6 +57,7 @@ use App\Http\Controllers\API\PropertyBoutiqueController;
 use App\Http\Controllers\API\Admin\AdminSocietyController;
 use App\Http\Controllers\API\Admin\AdminSocietyMapController;
 use App\Http\Controllers\API\Admin\AdminProjectController;
+// use App\Http\Controllers\API\ProjectController;
 // use App\Http\Controllers\API\LocationController;
 
 // use App\Http\Controllers\Api\HomeController;
@@ -423,6 +424,17 @@ Route::delete('society-maps/{id}', [AdminSocietyMapController::class, 'destroy']
     Route::post('projects/{id}/status', [AdminProjectController::class, 'updateStatus'])->whereNumber('id');
 
 
+
+
+
+
+
+    Route::get('projects/meta', [AdminProjectController::class, 'meta']);
+Route::get('projects', [AdminProjectController::class, 'index']);
+Route::post('projects', [AdminProjectController::class, 'store']);
+Route::get('projects/{id}', [AdminProjectController::class, 'show'])->whereNumber('id');
+Route::post('projects/{id}', [AdminProjectController::class, 'update'])->whereNumber('id');
+Route::delete('projects/{id}', [AdminProjectController::class, 'destroy'])->whereNumber('id');
 });
 
 

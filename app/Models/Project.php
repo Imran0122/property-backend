@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
@@ -29,6 +30,15 @@ class Project extends Model
         'cover_image_url',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($project) {
+            if (empty($project->slug) && !empty($project->title)) {
+                $project->slug = Str::slug($project->title) . '-' . time();
+            }
+        });
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class);
@@ -45,10 +55,17 @@ class Project extends Model
             return null;
         }
 
-        if (preg_match('/^https?:\/\//i', $this->cover_image)) {
-            return $this->cover_image;
+        $path = str_replace('\\', '/', $this->cover_image);
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return preg_replace('/^http:\/\//i', 'https://', $path);
         }
 
-        return asset('storage/' . ltrim($this->cover_image, '/'));
+        $path = preg_replace('#^/?public/#', '', $path);
+        $path = preg_replace('#^/?storage/#', '', $path);
+
+        $baseUrl = rtrim(config('app.url'), '/');
+
+        return $baseUrl . '/storage/' . ltrim($path, '/');
     }
 }
