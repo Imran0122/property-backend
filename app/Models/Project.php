@@ -50,22 +50,23 @@ class Project extends Model
     }
 
     public function getCoverImageUrlAttribute()
-    {
-        if (!$this->cover_image) {
-            return null;
-        }
-
-        $path = str_replace('\\', '/', $this->cover_image);
-
-        if (Str::startsWith($path, ['http://', 'https://'])) {
-            return preg_replace('/^http:\/\//i', 'https://', $path);
-        }
-
-        $path = preg_replace('#^/?public/#', '', $path);
-        $path = preg_replace('#^/?storage/#', '', $path);
-
-        $baseUrl = rtrim(config('app.url'), '/');
-
-        return $baseUrl . '/storage/' . ltrim($path, '/');
+{
+    if (!$this->cover_image) {
+        return null;
     }
+
+    $path = str_replace('\\', '/', trim($this->cover_image));
+
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return preg_replace('/^http:\/\//i', 'https://', $path);
+    }
+
+    $clean = ltrim($path, '/');
+
+    if (Str::startsWith($clean, 'storage/')) {
+        return url($clean);
+    }
+
+    return url('storage/' . $clean);
+}
 }

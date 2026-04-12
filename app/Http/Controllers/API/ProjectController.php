@@ -5,7 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ProjectController extends Controller
@@ -43,6 +44,7 @@ class ProjectController extends Controller
 
         if ($request->filled('city')) {
             $city = trim((string) $request->city);
+
             $query->where(function ($q) use ($city) {
                 $q->whereHas('city', function ($cityQuery) use ($city) {
                     $cityQuery->where('name', 'like', '%' . $city . '%');
@@ -58,8 +60,14 @@ class ProjectController extends Controller
             $query->where('developer', 'like', '%' . trim((string) $request->developer) . '%');
         }
 
-        if ($this->isTruthy($request->featured_only)) {
-            $query->where('is_featured', 1);
+        $featuredFilter = $request->get('featured_only', $request->get('featured', $request->get('is_featured')));
+
+        if ($featuredFilter !== null && $featuredFilter !== '' && $featuredFilter !== 'all') {
+            if ($this->isTruthy($featuredFilter)) {
+                $query->where('is_featured', 1);
+            } elseif (in_array($featuredFilter, [0, '0', false, 'false', 'no', 'off'], true)) {
+                $query->where('is_featured', 0);
+            }
         }
 
         $propertyType = trim((string) $request->get('property_type', ''));
@@ -144,6 +152,7 @@ class ProjectController extends Controller
     private function formatCard(Project $project): array
     {
         $summary = $this->buildSummary($project);
+        $coverImageUrl = $this->getPrimaryProjectImageUrl($project);
 
         return [
             'id' => $project->id,
@@ -156,7 +165,7 @@ class ProjectController extends Controller
             'status' => $project->status,
             'is_featured' => (bool) $project->is_featured,
             'cover_image' => $project->cover_image,
-            'cover_image_url' => $this->normalizeImage($project->cover_image),
+            'cover_image_url' => $coverImageUrl,
             'price_min' => $summary['price_min'],
             'price_max' => $summary['price_max'],
             'price_label' => $summary['price_label'],
@@ -173,7 +182,17 @@ class ProjectController extends Controller
     private function formatDetail(Project $project): array
     {
         $summary = $this->buildSummary($project);
-        $image = $this->normalizeImage($project->cover_image);
+        $coverImageUrl = $this->getPrimaryProjectImageUrl($project);
+        $gallery = $this->getProjectGallery($project->id);
+
+        if (empty($gallery) && $coverImageUrl) {
+            $gallery = [[
+                'id' => 'cover',
+                'image_path' => $project->cover_image,
+                'image_url' => $coverImageUrl,
+                'is_primary' => true,
+            ]];
+        }
 
         return [
             'id' => $project->id,
@@ -186,8 +205,9 @@ class ProjectController extends Controller
             'status' => $project->status,
             'is_featured' => (bool) $project->is_featured,
             'cover_image' => $project->cover_image,
-            'cover_image_url' => $image,
-            'gallery' => array_values(array_filter([$image])),
+            'cover_image_url' => $coverImageUrl,
+            'gallery' => $gallery,
+            'images' => $gallery,
             'price_min' => $summary['price_min'],
             'price_max' => $summary['price_max'],
             'price_label' => $summary['price_label'],
@@ -253,30 +273,89 @@ class ProjectController extends Controller
         ];
     }
 
+    private function getPrimaryProjectImageUrl(Project $project): ?string
+    {
+        $gallery = $this->getProjectGallery($project->id);
+
+        if (!empty($gallery) && !empty($gallery[0]['image_url'])) {
+            return $gallery[0]['image_url'];
+        }
+
+        return $this->normalizeImage($project->cover_image);
+    }
+
+    private function getProjectGallery(int $projectId): array
+    {
+        if (!Schema::hasTable('project_images')) {
+            return [];
+        }
+
+        $imageColumn = $this->projectImageColumn();
+
+        if (!$imageColumn) {
+            return [];
+        }
+
+        $query = DB::table('project_images')->where('project_id', $projectId);
+
+        if (Schema::hasColumn('project_images', 'is_primary')) {
+            $query->orderByDesc('is_primary');
+        }
+
+        if (Schema::hasColumn('project_images', 'sort_order')) {
+            $query->orderBy('sort_order');
+        } else {
+            $query->orderBy('id');
+        }
+
+        return $query->get()->map(function ($row) use ($imageColumn) {
+            $path = $row->{$imageColumn} ?? null;
+
+            return [
+                'id' => $row->id,
+                'image_path' => $path,
+                'image_url' => $this->normalizeImage($path),
+                'is_primary' => (bool) ($row->is_primary ?? false),
+            ];
+        })->values()->toArray();
+    }
+
+    private function projectImageColumn(): ?string
+    {
+        if (!Schema::hasTable('project_images')) {
+            return null;
+        }
+
+        if (Schema::hasColumn('project_images', 'image_path')) {
+            return 'image_path';
+        }
+
+        if (Schema::hasColumn('project_images', 'image')) {
+            return 'image';
+        }
+
+        return null;
+    }
+
     private function normalizeImage(?string $path): ?string
     {
         if (!$path) {
             return null;
         }
 
-        $path = trim($path);
+        $path = str_replace('\\', '/', trim($path));
 
         if (Str::startsWith($path, ['http://', 'https://'])) {
-            return $path;
+            return preg_replace('/^http:\/\//i', 'https://', $path);
         }
 
-        $base = rtrim(url('/'), '/');
-        $path = ltrim($path, '/');
+        $clean = ltrim($path, '/');
 
-        if (Str::startsWith($path, 'storage/')) {
-            return $base . '/' . $path;
+        if (Str::startsWith($clean, 'storage/')) {
+            return url($clean);
         }
 
-        if (Str::startsWith($path, 'projects/')) {
-            return $base . '/storage/' . $path;
-        }
-
-        return $base . '/storage/projects/' . $path;
+        return url('storage/' . $clean);
     }
 
     private function makeMoneyLabel(?float $min, ?float $max): string
@@ -324,9 +403,7 @@ class ProjectController extends Controller
     private function formatNumber(float $value): string
     {
         $formatted = number_format($value, 2, '.', ',');
-        $formatted = rtrim(rtrim($formatted, '0'), '.');
-
-        return $formatted;
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 
     private function isTruthy($value): bool

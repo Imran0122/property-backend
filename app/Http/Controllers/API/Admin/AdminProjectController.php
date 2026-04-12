@@ -100,18 +100,6 @@ class AdminProjectController extends Controller
         $projects = $query->latest()->paginate($perPage);
 
         $list = collect($projects->items())->map(function ($project) {
-            $gallery = $this->getProjectGallery($project->id);
-
-            $coverImageUrl = null;
-
-            if (!empty($gallery)) {
-                $coverImageUrl = $gallery[0]['image_url'] ?? null;
-            }
-
-            if (!$coverImageUrl && !empty($project->cover_image)) {
-                $coverImageUrl = $this->fileUrl($project->cover_image);
-            }
-
             $prices = $project->units
                 ->pluck('price')
                 ->filter(fn ($price) => $price !== null && $price !== '');
@@ -131,7 +119,7 @@ class AdminProjectController extends Controller
                 'price_min' => $prices->count() ? $prices->min() : null,
                 'price_max' => $prices->count() ? $prices->max() : null,
                 'cover_image' => $project->cover_image,
-                'cover_image_url' => $coverImageUrl,
+                'cover_image_url' => $this->primaryProjectImageUrl($project),
                 'date_label' => optional($project->created_at)?->format('d M Y'),
             ];
         })->values();
@@ -172,15 +160,15 @@ class AdminProjectController extends Controller
             ->findOrFail($id);
 
         $gallery = $this->getProjectGallery($project->id);
+        $coverImageUrl = $this->primaryProjectImageUrl($project);
 
-        $coverImageUrl = null;
-
-        if (!empty($gallery)) {
-            $coverImageUrl = $gallery[0]['image_url'] ?? null;
-        }
-
-        if (!$coverImageUrl && !empty($project->cover_image)) {
-            $coverImageUrl = $this->fileUrl($project->cover_image);
+        if (empty($gallery) && $coverImageUrl) {
+            $gallery = [[
+                'id' => 'cover-preview',
+                'image_path' => $project->cover_image,
+                'image_url' => $coverImageUrl,
+                'is_primary' => true,
+            ]];
         }
 
         return response()->json([
@@ -237,7 +225,9 @@ class AdminProjectController extends Controller
             }
 
             if ($request->hasFile('images')) {
-                $this->storeProjectImages($project, $request->file('images'));
+                $files = $request->file('images');
+                $files = is_array($files) ? $files : [$files];
+                $this->storeProjectImages($project, $files);
             }
 
             $this->refreshProjectCover($project);
@@ -273,12 +263,18 @@ class AdminProjectController extends Controller
             ]);
 
             $deleteImageIds = $request->input('delete_image_ids', []);
+            if (!is_array($deleteImageIds)) {
+                $deleteImageIds = [$deleteImageIds];
+            }
+
             if (!empty($deleteImageIds)) {
                 $this->deleteProjectImages($project->id, $deleteImageIds);
             }
 
             if ($request->hasFile('images')) {
-                $this->storeProjectImages($project, $request->file('images'));
+                $files = $request->file('images');
+                $files = is_array($files) ? $files : [$files];
+                $this->storeProjectImages($project, $files);
             }
 
             $project->units()->delete();
@@ -308,6 +304,7 @@ class AdminProjectController extends Controller
                 Storage::disk('public')->delete($project->cover_image);
             }
 
+            $project->units()->delete();
             $project->delete();
         });
 
@@ -381,10 +378,10 @@ class AdminProjectController extends Controller
                 return [
                     'title' => $unit['title'] ?? null,
                     'type' => $unit['type'] ?? null,
-                    'bedrooms' => $unit['bedrooms'] !== '' ? ($unit['bedrooms'] ?? null) : null,
-                    'bathrooms' => $unit['bathrooms'] !== '' ? ($unit['bathrooms'] ?? null) : null,
-                    'area' => $unit['area'] !== '' ? ($unit['area'] ?? null) : null,
-                    'price' => $unit['price'] !== '' ? ($unit['price'] ?? null) : null,
+                    'bedrooms' => ($unit['bedrooms'] ?? '') !== '' ? $unit['bedrooms'] : null,
+                    'bathrooms' => ($unit['bathrooms'] ?? '') !== '' ? $unit['bathrooms'] : null,
+                    'area' => ($unit['area'] ?? '') !== '' ? $unit['area'] : null,
+                    'price' => ($unit['price'] ?? '') !== '' ? $unit['price'] : null,
                     'status' => $unit['status'] ?? 'available',
                 ];
             })
@@ -410,7 +407,7 @@ class AdminProjectController extends Controller
                 ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
                 ->exists()
         ) {
-            $slug = $base . '-' . $counter;
+            $slug = ($base ?: 'project') . '-' . $counter;
             $counter++;
         }
 
@@ -430,6 +427,10 @@ class AdminProjectController extends Controller
         }
 
         foreach ($files as $index => $file) {
+            if (!$file) {
+                continue;
+            }
+
             $path = $file->store('projects', 'public');
 
             if (empty($project->cover_image) && $index === 0) {
@@ -477,6 +478,16 @@ class AdminProjectController extends Controller
 
         $imageColumn = $this->projectImageColumn();
         if (!$imageColumn) {
+            return;
+        }
+
+        $ids = collect($ids)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->values()
+            ->toArray();
+
+        if (empty($ids)) {
             return;
         }
 
@@ -531,6 +542,7 @@ class AdminProjectController extends Controller
 
         if (!empty($gallery)) {
             $firstPath = $gallery[0]['image_path'] ?? null;
+
             if ($firstPath) {
                 $project->cover_image = $firstPath;
                 $project->save();
@@ -538,10 +550,13 @@ class AdminProjectController extends Controller
             }
         }
 
-        if (empty($gallery)) {
-            $project->cover_image = null;
+        if (!empty($project->cover_image)) {
             $project->save();
+            return;
         }
+
+        $project->cover_image = null;
+        $project->save();
     }
 
     private function getProjectGallery(int $projectId): array
@@ -574,8 +589,20 @@ class AdminProjectController extends Controller
                 'id' => $row->id,
                 'image_path' => $path,
                 'image_url' => $this->fileUrl($path),
+                'is_primary' => (bool) ($row->is_primary ?? false),
             ];
         })->values()->toArray();
+    }
+
+    private function primaryProjectImageUrl(Project $project): ?string
+    {
+        $gallery = $this->getProjectGallery($project->id);
+
+        if (!empty($gallery) && !empty($gallery[0]['image_url'])) {
+            return $gallery[0]['image_url'];
+        }
+
+        return $this->fileUrl($project->cover_image);
     }
 
     private function projectImageColumn(): ?string
@@ -601,17 +628,18 @@ class AdminProjectController extends Controller
             return null;
         }
 
+        $path = str_replace('\\', '/', trim($path));
+
         if (Str::startsWith($path, ['http://', 'https://'])) {
-            return $path;
+            return preg_replace('/^http:\/\//i', 'https://', $path);
         }
 
-        $base = rtrim(config('app.url') ?: request()->getSchemeAndHttpHost(), '/');
         $clean = ltrim($path, '/');
 
         if (Str::startsWith($clean, 'storage/')) {
-            return $base . '/' . $clean;
+            return url($clean);
         }
 
-        return $base . '/storage/' . $clean;
+        return url('storage/' . $clean);
     }
 }
