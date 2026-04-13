@@ -173,17 +173,16 @@ Route::post('/property-images', [PropertyImageController::class, 'store']);
 
 
 Route::prefix('construction')->group(function () {
-
-    // Dropdown APIs
+    Route::get('/meta', [ConstructionController::class, 'meta']);
     Route::get('/cities', [ConstructionController::class, 'cities']);
+    Route::get('/units', [ConstructionController::class, 'units']);
     Route::get('/types', [ConstructionController::class, 'types']);
     Route::get('/modes', [ConstructionController::class, 'modes']);
+    Route::get('/popular', [ConstructionController::class, 'popular']);
 
-    // Main Calculator API
     Route::post('/calculate', [ConstructionCalculatorController::class, 'calculate']);
-    // Route::post('/construction/calculate', [ConstructionController::class, 'calculate']);
+    Route::get('/details', [ConstructionCalculatorController::class, 'details']);
 });
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json([
         'success' => true,
