@@ -80,7 +80,7 @@ use App\Http\Controllers\API\Admin\AdminProjectController;
 
 Route::get('/amenities', [AmenityController::class,'index']);
 Route::get('/dashboard-stats', [DashboardController::class, 'index']);
-Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
+// Route::get('/home-loan/calculate', [HomeLoanController::class, 'calculate']);
 
 Route::get('/properties/search', [PropertyController::class, 'searchApi']);
 Route::get('/properties/filter', [PropertyController::class, 'filter']);
@@ -331,6 +331,11 @@ Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function (
 });
 
 
+Route::prefix('home-loan')->group(function () {
+    Route::get('/meta', [HomeLoanController::class, 'meta']);
+    Route::get('/calculate', [HomeLoanController::class, 'calculate']);
+    Route::get('/products/{slug}', [HomeLoanController::class, 'show']);
+});
 
 /*
 |--------------------------------------------------------------------------
