@@ -16,7 +16,7 @@ class Blog extends Model
         'category',
         'author',
         'writer',
-        'reading_time',
         'status',
+        'reading_time',
     ];
 }

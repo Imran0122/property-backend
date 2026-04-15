@@ -32,7 +32,7 @@ class AdminArticleController extends Controller
             $query->where('category', $category);
         }
 
-        if ($status !== '' && strtolower($status) !== 'all status' && $this->hasColumn('status')) {
+        if ($status !== '' && strtolower($category) !== 'all status' && $this->hasColumn('status')) {
             $query->where('status', strtolower($status));
         }
 
@@ -45,7 +45,7 @@ class AdminArticleController extends Controller
         $articles = $query->paginate($perPage)->withQueryString();
 
         $articles->getCollection()->transform(function ($article) {
-            return $this->transformArticle($article, false);
+            return $this->transformArticle($article);
         });
 
         return response()->json([
@@ -91,6 +91,7 @@ class AdminArticleController extends Controller
                 ->where('status', '!=', '')
                 ->distinct()
                 ->pluck('status')
+                ->map(fn ($status) => strtolower((string) $status))
                 ->values();
         }
 
@@ -111,24 +112,24 @@ class AdminArticleController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Article details fetched successfully',
-            'data' => $this->transformArticle($article, true),
+            'data' => $this->transformArticleDetail($article),
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->validationRules());
+        $validated = $this->validateArticleRequest($request, null);
 
         $article = new Blog();
-        $payload = $this->buildPayload($request, $validated, null);
 
+        $payload = $this->buildArticlePayload($request, $validated, null);
         $article->forceFill($payload);
         $article->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Article created successfully',
-            'data' => $this->transformArticle($article->fresh(), true),
+            'data' => $this->transformArticleDetail($article->fresh()),
         ], 201);
     }
 
@@ -136,17 +137,16 @@ class AdminArticleController extends Controller
     {
         $article = Blog::findOrFail($id);
 
-        $validated = $request->validate($this->validationRules($article->id));
+        $validated = $this->validateArticleRequest($request, $article);
 
-        $payload = $this->buildPayload($request, $validated, $article);
-
+        $payload = $this->buildArticlePayload($request, $validated, $article);
         $article->forceFill($payload);
         $article->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Article updated successfully',
-            'data' => $this->transformArticle($article->fresh(), true),
+            'data' => $this->transformArticleDetail($article->fresh()),
         ]);
     }
 
@@ -154,8 +154,8 @@ class AdminArticleController extends Controller
     {
         $article = Blog::findOrFail($id);
 
-        $oldImage = $this->articleImageValue($article);
-        $this->deleteStoredImageIfNeeded($oldImage);
+        $oldImage = $this->value($article, 'image');
+        $this->deleteStoredImage($oldImage);
 
         $article->delete();
 
@@ -176,7 +176,7 @@ class AdminArticleController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Article published successfully',
-            'data' => $this->transformArticle($article->fresh(), true),
+            'data' => $this->transformArticleDetail($article->fresh()),
         ]);
     }
 
@@ -191,163 +191,251 @@ class AdminArticleController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Article moved to draft successfully',
-            'data' => $this->transformArticle($article->fresh(), true),
+            'data' => $this->transformArticleDetail($article->fresh()),
         ]);
     }
 
-    private function validationRules($ignoreId = null): array
+    private function validateArticleRequest(Request $request, ?Blog $article = null): array
     {
-        return [
-            'title' => 'required|string|max:255',
-            'slug' => [
+        $rules = [];
+
+        if ($this->hasColumn('title')) {
+            $rules['title'] = 'required|string|max:255';
+        }
+
+        if ($this->hasColumn('slug')) {
+            $rules['slug'] = [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('blogs', 'slug')->ignore($ignoreId),
-            ],
-            'category' => 'nullable|string|max:255',
-            'author' => 'nullable|string|max:255',
-            'writer' => 'nullable|string|max:255',
-            'status' => ['nullable', 'string', Rule::in(['published', 'draft', 'Published', 'Draft'])],
-            'excerpt' => 'nullable|string',
-            'description' => 'nullable|string',
-            'content' => 'nullable|string',
-            'reading_time' => 'nullable|string|max:50',
-            'image' => 'nullable|string|max:2048',
-            'image_url' => 'nullable|string|max:2048',
-            'image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
-        ];
+                Rule::unique('blogs', 'slug')->ignore($article?->id),
+            ];
+        }
+
+        if ($this->hasColumn('category')) {
+            $rules['category'] = 'nullable|string|max:255';
+        }
+
+        if ($this->hasColumn('author')) {
+            $rules['author'] = 'nullable|string|max:255';
+        }
+
+        if ($this->hasColumn('writer')) {
+            $rules['writer'] = 'nullable|string|max:255';
+        }
+
+        if ($this->hasColumn('status')) {
+            $rules['status'] = ['nullable', 'string', Rule::in(['published', 'draft', 'Published', 'Draft'])];
+        }
+
+        if ($this->hasColumn('excerpt')) {
+            $rules['excerpt'] = 'nullable|string';
+        }
+
+        if ($this->hasColumn('description')) {
+            $rules['description'] = 'nullable|string';
+        }
+
+        if ($this->hasColumn('content')) {
+            $rules['content'] = 'nullable|string';
+        }
+
+        if ($this->hasColumn('reading_time')) {
+            $rules['reading_time'] = 'nullable|string|max:50';
+        }
+
+        $rules['image_url'] = 'nullable|string|max:2048';
+        $rules['image'] = 'nullable|string|max:2048';
+        $rules['image_file'] = 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120';
+
+        return $request->validate($rules);
     }
 
-    private function buildPayload(Request $request, array $validated, ?Blog $article = null): array
+    private function buildArticlePayload(Request $request, array $validated, ?Blog $article = null): array
     {
         $payload = [];
 
+        $title = $validated['title'] ?? $this->value($article, 'title', '');
+
         if ($this->hasColumn('title')) {
-            $payload['title'] = $validated['title'] ?? ($article->title ?? null);
+            $payload['title'] = $title;
         }
 
         if ($this->hasColumn('slug')) {
             $payload['slug'] = !empty($validated['slug'] ?? null)
                 ? Str::slug($validated['slug'])
-                : ($article?->slug ?: Str::slug($validated['title'] ?? ('article-' . now()->timestamp)) . '-' . now()->timestamp);
+                : ($this->value($article, 'slug') ?: Str::slug($title ?: ('article-' . now()->timestamp)) . '-' . now()->timestamp);
         }
 
         if ($this->hasColumn('category')) {
-            $payload['category'] = $validated['category'] ?? ($article->category ?? 'Immobilier');
+            $payload['category'] = $validated['category'] ?? $this->value($article, 'category', 'Immobilier');
         }
 
+        $authorValue = $validated['author']
+            ?? $validated['writer']
+            ?? $this->value($article, 'author')
+            ?? $this->value($article, 'writer')
+            ?? optional($request->user())->name
+            ?? 'Hectare Admin';
+
         if ($this->hasColumn('author')) {
-            $payload['author'] = $validated['author']
-                ?? $validated['writer']
-                ?? ($article->author ?? optional($request->user())->name ?? 'Hectare Admin');
+            $payload['author'] = $authorValue;
         }
 
         if ($this->hasColumn('writer')) {
-            $payload['writer'] = $validated['writer']
-                ?? $validated['author']
-                ?? ($article->writer ?? optional($request->user())->name ?? 'Hectare Admin');
+            $payload['writer'] = $authorValue;
         }
 
         if ($this->hasColumn('status')) {
-            $status = $validated['status'] ?? ($article->status ?? 'draft');
-            $payload['status'] = strtolower((string) $status);
+            $payload['status'] = strtolower((string) ($validated['status'] ?? $this->value($article, 'status', 'draft')));
         }
 
         if ($this->hasColumn('excerpt')) {
-            $payload['excerpt'] = $validated['excerpt'] ?? ($article->excerpt ?? null);
+            $payload['excerpt'] = $validated['excerpt'] ?? $this->value($article, 'excerpt');
         }
 
         if ($this->hasColumn('description')) {
             $payload['description'] = $validated['description']
-                ?? $validated['excerpt']
-                ?? ($article->description ?? null);
+                ?? $validated['content']
+                ?? $this->value($article, 'description');
         }
 
         if ($this->hasColumn('content')) {
             $payload['content'] = $validated['content']
                 ?? $validated['description']
-                ?? ($article->content ?? null);
+                ?? $this->value($article, 'content');
         }
 
         if ($this->hasColumn('reading_time')) {
             $payload['reading_time'] = $validated['reading_time']
-                ?? ($article->reading_time ?? '2 MIN');
+                ?? $this->value($article, 'reading_time', '2 MIN');
         }
 
-        $imageColumn = $this->firstExistingColumn(['image', 'featured_image', 'cover_image']);
-
-        if ($imageColumn) {
-            $incomingImage = $this->resolveIncomingImage($request, $validated, $article);
-
-            if ($incomingImage !== '__KEEP__') {
-                $payload[$imageColumn] = $incomingImage;
-            }
+        if ($this->hasColumn('image')) {
+            $payload['image'] = $this->prepareImageValue($request, $article);
         }
 
         return $payload;
     }
 
-    private function resolveIncomingImage(Request $request, array $validated, ?Blog $article = null)
+    private function prepareImageValue(Request $request, ?Blog $article = null): ?string
     {
+        $currentImage = $this->value($article, 'image');
+
         if ($request->hasFile('image_file')) {
-            $oldImage = $article ? $this->articleImageValue($article) : null;
-            $this->deleteStoredImageIfNeeded($oldImage);
+            $this->deleteStoredImage($currentImage);
 
-            return $request->file('image_file')->store('blogs', 'public');
+            $path = $request->file('image_file')->store('blogs', 'public');
+            return $path;
         }
 
-        $imageInput = trim((string) ($validated['image_url'] ?? $validated['image'] ?? ''));
-
-        if ($imageInput !== '') {
-            $oldImage = $article ? $this->articleImageValue($article) : null;
-
-            if ($oldImage && $oldImage !== $imageInput) {
-                $this->deleteStoredImageIfNeeded($oldImage);
-            }
-
-            return $imageInput;
+        $imageUrl = trim((string) ($request->input('image_url', '') ?: $request->input('image', '')));
+        if ($imageUrl !== '') {
+            return $imageUrl;
         }
 
-        return $article ? '__KEEP__' : null;
+        return $currentImage;
     }
 
-    private function transformArticle($article, bool $withContent = false): array
+    private function deleteStoredImage(?string $path): void
     {
-        $imagePath = $this->articleImageValue($article);
-        $description = $this->value($article, 'description')
-            ?? $this->value($article, 'excerpt')
-            ?? $this->excerpt($article);
+        if (!$path) return;
 
-        $content = $this->value($article, 'content') ?? $description;
+        if (Str::startsWith($path, ['http://', 'https://', '/storage/', 'storage/'])) {
+            $normalized = ltrim(str_replace('/storage/', '', $path), '/');
+            if ($normalized !== $path && Storage::disk('public')->exists($normalized)) {
+                Storage::disk('public')->delete($normalized);
+            }
+            return;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    private function transformArticle(Blog $article): array
+    {
+        $image = $this->value($article, 'image');
 
         return [
             'id' => $article->id,
             'title' => $this->value($article, 'title', 'Untitled'),
             'slug' => $this->value($article, 'slug'),
             'category' => $this->value($article, 'category', 'Immobilier'),
-            'author' => $this->value($article, 'author', $this->value($article, 'writer', 'Hectare Admin')),
-            'writer' => $this->value($article, 'writer', $this->value($article, 'author', 'Hectare Admin')),
-            'status' => $this->normalizeStatus($this->value($article, 'status', 'draft')),
+            'author' => $this->getAuthorValue($article),
+            'writer' => $this->getAuthorValue($article),
+            'status' => strtolower((string) $this->value($article, 'status', 'draft')),
             'date' => $this->formatDateLabel($this->value($article, 'created_at')),
             'created_at' => $this->formatDateTime($this->value($article, 'created_at')),
-            'updated_at' => $this->formatDateTime($this->value($article, 'updated_at')),
             'excerpt' => $this->excerpt($article),
-            'description' => $description,
-            'content' => $withContent ? $content : null,
-            'reading_time' => $this->value($article, 'reading_time', '2 MIN'),
-            'read_time' => $this->value($article, 'reading_time', '2 MIN'),
-            'image' => $imagePath,
-            'image_url' => $this->resolveImageUrl($imagePath),
+            'description' => $this->description($article),
+            'image' => $image,
+            'image_url' => $this->resolveImageUrl($image),
         ];
     }
 
-    private function articleImageValue($article): ?string
+    private function transformArticleDetail(Blog $article): array
     {
-        foreach (['image', 'featured_image', 'cover_image'] as $column) {
-            if ($this->hasColumn($column) && !empty($article->{$column})) {
-                return $article->{$column};
-            }
+        $image = $this->value($article, 'image');
+
+        return [
+            'id' => $article->id,
+            'title' => $this->value($article, 'title', 'Untitled'),
+            'slug' => $this->value($article, 'slug'),
+            'category' => $this->value($article, 'category', 'Immobilier'),
+            'author' => $this->getAuthorValue($article),
+            'writer' => $this->getAuthorValue($article),
+            'status' => strtolower((string) $this->value($article, 'status', 'draft')),
+            'excerpt' => $this->excerpt($article),
+            'description' => $this->description($article),
+            'content' => $this->value($article, 'content', ''),
+            'image' => $image,
+            'image_url' => $this->resolveImageUrl($image),
+            'reading_time' => $this->value($article, 'reading_time', '2 MIN'),
+            'read_time' => $this->value($article, 'reading_time', '2 MIN'),
+            'created_at' => $this->formatDateTime($this->value($article, 'created_at')),
+            'updated_at' => $this->formatDateTime($this->value($article, 'updated_at')),
+            'date' => $this->formatDateLabel($this->value($article, 'created_at')),
+        ];
+    }
+
+    private function getAuthorValue(Blog $article): string
+    {
+        return $this->value($article, 'author')
+            ?? $this->value($article, 'writer')
+            ?? 'Hectare Admin';
+    }
+
+    private function description(Blog $article): ?string
+    {
+        if ($this->hasColumn('description') && !empty($article->description)) {
+            return $article->description;
+        }
+
+        if ($this->hasColumn('excerpt') && !empty($article->excerpt)) {
+            return $article->excerpt;
+        }
+
+        if ($this->hasColumn('content') && !empty($article->content)) {
+            return Str::limit(strip_tags((string) $article->content), 160);
+        }
+
+        return null;
+    }
+
+    private function excerpt(Blog $article): ?string
+    {
+        if ($this->hasColumn('excerpt') && !empty($article->excerpt)) {
+            return $article->excerpt;
+        }
+
+        if ($this->hasColumn('description') && !empty($article->description)) {
+            return Str::limit(strip_tags((string) $article->description), 150);
+        }
+
+        if ($this->hasColumn('content') && !empty($article->content)) {
+            return Str::limit(strip_tags((string) $article->content), 150);
         }
 
         return null;
@@ -364,38 +452,14 @@ class AdminArticleController extends Controller
         }
 
         if (Str::startsWith($path, '/storage/')) {
-            return url($path);
+            return $path;
         }
 
         if (Str::startsWith($path, 'storage/')) {
-            return url('/' . $path);
+            return '/' . ltrim($path, '/');
         }
 
         return Storage::disk('public')->url($path);
-    }
-
-    private function deleteStoredImageIfNeeded(?string $path): void
-    {
-        if (!$path) return;
-
-        if (Str::startsWith($path, ['http://', 'https://', '/storage/', 'storage/'])) {
-            return;
-        }
-
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
-    }
-
-    private function firstExistingColumn(array $columns): ?string
-    {
-        foreach ($columns as $column) {
-            if ($this->hasColumn($column)) {
-                return $column;
-            }
-        }
-
-        return null;
     }
 
     private function hasColumn(string $column): bool
@@ -410,40 +474,19 @@ class AdminArticleController extends Controller
 
     private function formatDateLabel($date): ?string
     {
-        if (!$date) return null;
+        if (!$date) {
+            return null;
+        }
+
         return \Carbon\Carbon::parse($date)->format('d M Y');
     }
 
     private function formatDateTime($date): ?string
     {
-        if (!$date) return null;
+        if (!$date) {
+            return null;
+        }
+
         return \Carbon\Carbon::parse($date)->format('Y-m-d H:i:s');
-    }
-
-    private function normalizeStatus($status): string
-    {
-        $status = strtolower((string) $status);
-
-        if ($status === 'published') return 'Published';
-        if ($status === 'draft') return 'Draft';
-
-        return ucfirst($status ?: 'draft');
-    }
-
-    private function excerpt($article): ?string
-    {
-        if ($this->hasColumn('excerpt') && !empty($article->excerpt)) {
-            return $article->excerpt;
-        }
-
-        if ($this->hasColumn('description') && !empty($article->description)) {
-            return Str::limit(strip_tags((string) $article->description), 150);
-        }
-
-        if ($this->hasColumn('content') && !empty($article->content)) {
-            return Str::limit(strip_tags((string) $article->content), 150);
-        }
-
-        return null;
     }
 }
