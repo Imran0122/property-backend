@@ -4,19 +4,20 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
-    /**
-     * Blog listing
-     */
     public function index()
     {
-        $blogs = Blog::where('status', 'published')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Blog::query();
+
+        if (Schema::hasColumn('blogs', 'status')) {
+            $query->whereIn('status', ['published', 'Published']);
+        }
+
+        $blogs = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'status' => true,
@@ -24,14 +25,15 @@ class BlogController extends Controller
         ]);
     }
 
-    /**
-     * Single blog detail
-     */
     public function show($slug)
     {
-        $blog = Blog::where('slug', $slug)
-            ->where('status', 'published')
-            ->first();
+        $query = Blog::where('slug', $slug);
+
+        if (Schema::hasColumn('blogs', 'status')) {
+            $query->whereIn('status', ['published', 'Published']);
+        }
+
+        $blog = $query->first();
 
         if (!$blog) {
             return response()->json([
@@ -46,25 +48,33 @@ class BlogController extends Controller
         ]);
     }
 
-    /**
-     * Normalize blog payload for frontend
-     */
     private function formatBlog(Blog $blog, bool $withContent = false): array
     {
-        $imageUrl = $this->resolveImageUrl($blog->image);
+        $rawImage = $blog->image ?? null;
+        $imageUrl = $this->resolveImageUrl($rawImage);
 
-        $description = $blog->description ?: Str::limit(strip_tags((string) $blog->content), 160);
+        $description =
+            $blog->description
+            ?: $blog->excerpt
+            ?: Str::limit(strip_tags((string) $blog->content), 160);
+
         $categoryName = !empty($blog->category) ? $blog->category : 'Immobilier';
-        $authorName = !empty($blog->writer) ? $blog->writer : 'Hectare Admin';
-        $readTime = !empty($blog->reading_time) ? $blog->reading_time : '2 MIN';
+        $authorName =
+            !empty($blog->writer)
+                ? $blog->writer
+                : (!empty($blog->author) ? $blog->author : 'Hectare Admin');
 
-        return [
+        $readTime =
+            !empty($blog->reading_time)
+                ? $blog->reading_time
+                : '2 MIN';
+
+        $payload = [
             'id' => $blog->id,
             'title' => $blog->title,
             'slug' => $blog->slug,
 
-            // old + new compatible fields
-            'image' => $blog->image,
+            'image' => $rawImage,
             'image_url' => $imageUrl,
 
             'description' => $description,
@@ -83,14 +93,15 @@ class BlogController extends Controller
             'date' => optional($blog->created_at)->format('d F Y'),
             'created_at' => optional($blog->created_at)?->toISOString(),
             'updated_at' => optional($blog->updated_at)?->toISOString(),
-        ] + ($withContent ? [
-            'content' => $blog->content,
-        ] : []);
+        ];
+
+        if ($withContent) {
+            $payload['content'] = $blog->content;
+        }
+
+        return $payload;
     }
 
-    /**
-     * Resolve blog image URL
-     */
     private function resolveImageUrl(?string $path): ?string
     {
         if (!$path) {
@@ -101,14 +112,16 @@ class BlogController extends Controller
             return $path;
         }
 
+        $base = rtrim(config('app.url'), '/');
+
         if (Str::startsWith($path, '/storage/')) {
-            return url($path);
+            return $base . $path;
         }
 
         if (Str::startsWith($path, 'storage/')) {
-            return url('/' . $path);
+            return $base . '/' . ltrim($path, '/');
         }
 
-        return Storage::disk('public')->url($path);
+        return $base . '/storage/' . ltrim($path, '/');
     }
 }

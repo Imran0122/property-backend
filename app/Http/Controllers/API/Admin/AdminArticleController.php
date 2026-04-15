@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -33,12 +34,28 @@ class AdminArticleController extends Controller
             $query->where('title', 'like', "%{$search}%");
         }
 
-        if ($category !== '' && strtolower($category) !== 'all categories' && $this->hasColumn('category')) {
+        if (
+            $category !== '' &&
+            strtolower($category) !== 'all categories' &&
+            $this->hasColumn('category')
+        ) {
             $query->where('category', $category);
         }
 
-        if ($status !== '' && strtolower($status) !== 'all status' && $this->hasColumn('status')) {
-            $query->where('status', $status);
+        if (
+            $status !== '' &&
+            strtolower($status) !== 'all status' &&
+            $this->hasColumn('status')
+        ) {
+            $normalizedStatus = strtolower($status);
+
+            if ($normalizedStatus === 'published') {
+                $query->whereIn('status', ['Published', 'published']);
+            } elseif ($normalizedStatus === 'draft') {
+                $query->whereIn('status', ['Draft', 'draft']);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         if ($this->hasColumn('created_at')) {
@@ -124,9 +141,11 @@ class AdminArticleController extends Controller
                 'slug' => $this->value($article, 'slug'),
                 'category' => $this->value($article, 'category', 'General'),
                 'author' => $this->value($article, 'author', 'Admin'),
-                'status' => $this->value($article, 'status', 'Draft'),
+                'status' => $this->normalizeStatus($this->value($article, 'status', 'Draft')),
                 'excerpt' => $this->value($article, 'excerpt'),
                 'content' => $this->value($article, 'content'),
+                'image' => $this->value($article, 'image'),
+                'image_url' => $this->resolveImageUrl($this->value($article, 'image')),
                 'created_at' => $this->formatDateTime($this->value($article, 'created_at')),
                 'updated_at' => $this->formatDateTime($this->value($article, 'updated_at')),
                 'date_label' => $this->formatDateLabel($this->value($article, 'created_at')),
@@ -167,6 +186,10 @@ class AdminArticleController extends Controller
             $rules['content'] = 'nullable|string';
         }
 
+        if ($this->hasColumn('image')) {
+            $rules['image'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096';
+        }
+
         $validated = $request->validate($rules);
 
         $payload = [];
@@ -199,6 +222,10 @@ class AdminArticleController extends Controller
 
         if ($this->hasColumn('content')) {
             $payload['content'] = $validated['content'] ?? null;
+        }
+
+        if ($this->hasColumn('image') && $request->hasFile('image')) {
+            $payload['image'] = $request->file('image')->store('blogs', 'public');
         }
 
         $article = new Blog();
@@ -252,6 +279,10 @@ class AdminArticleController extends Controller
             $rules['content'] = 'nullable|string';
         }
 
+        if ($this->hasColumn('image')) {
+            $rules['image'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096';
+        }
+
         $validated = $request->validate($rules);
 
         $payload = [];
@@ -286,6 +317,14 @@ class AdminArticleController extends Controller
             $payload['content'] = $validated['content'] ?? $this->value($article, 'content');
         }
 
+        if ($this->hasColumn('image') && $request->hasFile('image')) {
+            if (!empty($article->image)) {
+                Storage::disk('public')->delete($article->image);
+            }
+
+            $payload['image'] = $request->file('image')->store('blogs', 'public');
+        }
+
         $article->forceFill($payload)->save();
 
         return response()->json([
@@ -299,6 +338,11 @@ class AdminArticleController extends Controller
     public function destroy($id)
     {
         $article = Blog::findOrFail($id);
+
+        if ($this->hasColumn('image') && !empty($article->image)) {
+            Storage::disk('public')->delete($article->image);
+        }
+
         $article->delete();
 
         return response()->json([
@@ -351,6 +395,8 @@ class AdminArticleController extends Controller
             'date' => $this->formatDateLabel($this->value($article, 'created_at')),
             'created_at' => $this->formatDateTime($this->value($article, 'created_at')),
             'excerpt' => $this->excerpt($article),
+            'image' => $this->value($article, 'image'),
+            'image_url' => $this->resolveImageUrl($this->value($article, 'image')),
         ];
     }
 
@@ -408,5 +454,28 @@ class AdminArticleController extends Controller
         }
 
         return null;
+    }
+
+    private function resolveImageUrl($path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        $base = rtrim(config('app.url'), '/');
+
+        if (Str::startsWith($path, '/storage/')) {
+            return $base . $path;
+        }
+
+        if (Str::startsWith($path, 'storage/')) {
+            return $base . '/' . ltrim($path, '/');
+        }
+
+        return $base . '/storage/' . ltrim($path, '/');
     }
 }

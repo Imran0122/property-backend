@@ -11,6 +11,12 @@ class Blog extends Model
         'slug',
         'image',
         'excerpt',
+        'description',
         'content',
+        'category',
+        'author',
+        'writer',
+        'reading_time',
+        'status',
     ];
 }
