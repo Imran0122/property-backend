@@ -57,6 +57,7 @@ use App\Http\Controllers\API\PropertyBoutiqueController;
 use App\Http\Controllers\API\Admin\AdminSocietyController;
 use App\Http\Controllers\API\Admin\AdminSocietyMapController;
 use App\Http\Controllers\API\Admin\AdminProjectController;
+use App\Http\Controllers\API\ContactInquiryController;
 // use App\Http\Controllers\API\ProjectController;
 // use App\Http\Controllers\API\LocationController;
 
@@ -170,7 +171,7 @@ Route::get('/banks', [BankController::class, 'index']);
 Route::get('/useful-links', [ToolsController::class, 'usefulLinks']);
 
 Route::post('/property-images', [PropertyImageController::class, 'store']);
-
+Route::post('/contact-inquiries', [ContactInquiryController::class, 'store']);
 
 Route::prefix('construction')->group(function () {
     Route::get('/meta', [ConstructionController::class, 'meta']);
