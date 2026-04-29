@@ -1030,65 +1030,162 @@ class PropertyController extends Controller
         });
     }
 
+    // private function formatListingCard(Property $property, ?int $authUserId = null): array
+    // {
+    //     $mainImage = optional($property->images->sortByDesc('is_primary')->first())->url;
+
+    //     $featuredLabel = null;
+    //     if ($property->is_super_hot) {
+    //         $featuredLabel = 'super-hot';
+    //     } elseif ($property->is_hot) {
+    //         $featuredLabel = 'hot';
+    //     } elseif ($property->is_featured) {
+    //         $featuredLabel = 'featured';
+    //     }
+
+    //     $locationText = collect([
+    //         $property->areaDetail?->name ?: $property->area,
+    //         $property->city?->name,
+    //     ])->filter()->implode(', ');
+
+    //     $isFavorite = false;
+    //     if ($authUserId) {
+    //         $isFavorite = $property->favoritedBy()->where('user_id', $authUserId)->exists();
+    //     }
+
+    //     return [
+    //         'id' => $property->id,
+    //         'slug' => $property->slug,
+    //         'title' => $property->title,
+    //         'price' => (float) $property->price,
+    //         'currency' => 'MAD',
+    //         'purpose' => $property->purpose,
+    //         'location_text' => $locationText,
+    //         'city' => $property->city?->name,
+    //         'area_name' => $property->areaDetail?->name ?: $property->area,
+    //         'property_type' => $property->propertyType?->name,
+    //         'bedrooms' => $property->bedrooms,
+    //         'bathrooms' => $property->bathrooms,
+    //         'area_size' => $property->area_size,
+    //         'area_unit' => $property->area_unit,
+    //         'description_short' => Str::limit(strip_tags((string) $property->description), 140),
+    //         'is_featured' => (bool) $property->is_featured,
+    //         'is_hot' => (bool) $property->is_hot,
+    //         'is_super_hot' => (bool) $property->is_super_hot,
+    //         'featured_label' => $featuredLabel,
+    //         'main_image' => $mainImage,
+    //         'images_count' => $property->images->count(),
+    //         'is_favorite' => $isFavorite,
+    //         'added_at' => optional($property->created_at)->diffForHumans(),
+    //         'updated_at' => optional($property->updated_at)->diffForHumans(),
+    //         'agent' => $property->user ? [
+    //             'id' => $property->user->id,
+    //             'name' => $property->user->name,
+    //             'agency' => $property->user->agency?->name,
+    //             'phone' => $property->user->phone,
+    //             'mobile' => $property->user->mobile,
+    //             'whatsapp' => $property->user->whatsapp,
+    //             'landline' => $property->user->landline,
+    //         ] : null,
+    //     ];
+    // }
+
+
+
+
+
+
+
+
     private function formatListingCard(Property $property, ?int $authUserId = null): array
-    {
-        $mainImage = optional($property->images->sortByDesc('is_primary')->first())->url;
+{
+    $gallery = $property->images
+        ->sortByDesc('is_primary')
+        ->values()
+        ->map(function ($image) {
+            return [
+                'id' => $image->id,
+                'url' => $image->url,
+                'image_url' => $image->url,
+                'is_primary' => (bool) $image->is_primary,
+            ];
+        })
+        ->values();
 
-        $featuredLabel = null;
-        if ($property->is_super_hot) {
-            $featuredLabel = 'super-hot';
-        } elseif ($property->is_hot) {
-            $featuredLabel = 'hot';
-        } elseif ($property->is_featured) {
-            $featuredLabel = 'featured';
-        }
+    $mainImage = optional($gallery->first())['image_url'] ?? null;
 
-        $locationText = collect([
-            $property->areaDetail?->name ?: $property->area,
-            $property->city?->name,
-        ])->filter()->implode(', ');
+    $featuredLabel = null;
 
-        $isFavorite = false;
-        if ($authUserId) {
-            $isFavorite = $property->favoritedBy()->where('user_id', $authUserId)->exists();
-        }
-
-        return [
-            'id' => $property->id,
-            'slug' => $property->slug,
-            'title' => $property->title,
-            'price' => (float) $property->price,
-            'currency' => 'MAD',
-            'purpose' => $property->purpose,
-            'location_text' => $locationText,
-            'city' => $property->city?->name,
-            'area_name' => $property->areaDetail?->name ?: $property->area,
-            'property_type' => $property->propertyType?->name,
-            'bedrooms' => $property->bedrooms,
-            'bathrooms' => $property->bathrooms,
-            'area_size' => $property->area_size,
-            'area_unit' => $property->area_unit,
-            'description_short' => Str::limit(strip_tags((string) $property->description), 140),
-            'is_featured' => (bool) $property->is_featured,
-            'is_hot' => (bool) $property->is_hot,
-            'is_super_hot' => (bool) $property->is_super_hot,
-            'featured_label' => $featuredLabel,
-            'main_image' => $mainImage,
-            'images_count' => $property->images->count(),
-            'is_favorite' => $isFavorite,
-            'added_at' => optional($property->created_at)->diffForHumans(),
-            'updated_at' => optional($property->updated_at)->diffForHumans(),
-            'agent' => $property->user ? [
-                'id' => $property->user->id,
-                'name' => $property->user->name,
-                'agency' => $property->user->agency?->name,
-                'phone' => $property->user->phone,
-                'mobile' => $property->user->mobile,
-                'whatsapp' => $property->user->whatsapp,
-                'landline' => $property->user->landline,
-            ] : null,
-        ];
+    if ($property->is_super_hot) {
+        $featuredLabel = 'super-hot';
+    } elseif ($property->is_hot) {
+        $featuredLabel = 'hot';
+    } elseif ($property->is_featured) {
+        $featuredLabel = 'featured';
     }
+
+    $locationText = collect([
+        $property->areaDetail?->name ?: $property->area,
+        $property->city?->name,
+    ])->filter()->implode(', ');
+
+    $isFavorite = false;
+
+    if ($authUserId) {
+        $isFavorite = $property->favoritedBy()
+            ->where('user_id', $authUserId)
+            ->exists();
+    }
+
+    return [
+        'id' => $property->id,
+        'slug' => $property->slug,
+        'title' => $property->title,
+        'price' => (float) $property->price,
+        'currency' => 'MAD',
+        'purpose' => $property->purpose,
+        'location_text' => $locationText,
+        'city' => $property->city?->name,
+        'area_name' => $property->areaDetail?->name ?: $property->area,
+        'property_type' => $property->propertyType?->name,
+        'bedrooms' => $property->bedrooms,
+        'bathrooms' => $property->bathrooms,
+        'area_size' => $property->area_size,
+        'area_unit' => $property->area_unit,
+        'description_short' => Str::limit(strip_tags((string) $property->description), 140),
+
+        'is_featured' => (bool) $property->is_featured,
+        'is_hot' => (bool) $property->is_hot,
+        'is_super_hot' => (bool) $property->is_super_hot,
+        'featured_label' => $featuredLabel,
+
+        'main_image' => $mainImage,
+        'images_count' => $gallery->count(),
+
+        // Important for listing page card gallery
+        'gallery' => $gallery,
+        'gallery_images' => $gallery,
+        'images' => $gallery,
+        'property_images' => $gallery,
+
+        'is_favorite' => $isFavorite,
+        'added_at' => optional($property->created_at)->diffForHumans(),
+        'updated_at' => optional($property->updated_at)->diffForHumans(),
+
+        'agent' => $property->user ? [
+            'id' => $property->user->id,
+            'name' => $property->user->name,
+            'agency' => $property->user->agency?->name,
+            'phone' => $property->user->phone,
+            'mobile' => $property->user->mobile,
+            'whatsapp' => $property->user->whatsapp,
+            'landline' => $property->user->landline,
+        ] : null,
+    ];
+}
+
+
+
 
     private function formatDetailPayload(Property $property, ?int $authUserId = null): array
     {
