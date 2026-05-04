@@ -58,6 +58,7 @@ use App\Http\Controllers\API\Admin\AdminSocietyController;
 use App\Http\Controllers\API\Admin\AdminSocietyMapController;
 use App\Http\Controllers\API\Admin\AdminProjectController;
 use App\Http\Controllers\API\ContactInquiryController;
+use App\Http\Controllers\API\Admin\AdminAgencyController;
 // use App\Http\Controllers\API\ProjectController;
 // use App\Http\Controllers\API\LocationController;
 
@@ -440,6 +441,22 @@ Route::post('projects', [AdminProjectController::class, 'store']);
 Route::get('projects/{id}', [AdminProjectController::class, 'show'])->whereNumber('id');
 Route::post('projects/{id}', [AdminProjectController::class, 'update'])->whereNumber('id');
 Route::delete('projects/{id}', [AdminProjectController::class, 'destroy'])->whereNumber('id');
+
+
+
+
+// Agencies Management
+Route::get('agencies', [AdminAgencyController::class, 'index']);
+Route::get('agencies/{id}', [AdminAgencyController::class, 'show'])->whereNumber('id');
+Route::post('agencies/{id}/approve', [AdminAgencyController::class, 'approve'])->whereNumber('id');
+Route::post('agencies/{id}/reject', [AdminAgencyController::class, 'reject'])->whereNumber('id');
+Route::delete('agencies/{id}', [AdminAgencyController::class, 'destroy'])->whereNumber('id');
+
+// Agents Full List
+Route::get('agents', [AdminAgentController::class, 'index']);
+Route::get('agents/{id}', [AdminAgentController::class, 'show'])->whereNumber('id');
+Route::delete('agents/{id}', [AdminAgentController::class, 'destroy'])->whereNumber('id');
+
 });
 
 
