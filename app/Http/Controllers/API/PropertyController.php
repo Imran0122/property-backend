@@ -604,6 +604,42 @@ class PropertyController extends Controller
             'message' => 'Property added successfully',
             'data' => $property,
         ]);
+
+
+
+
+
+
+
+
+
+
+// After property is saved successfully:
+try {
+    \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))->send(
+        new \App\Mail\AdminSubmissionMail(
+            'property',
+            auth()->user()->name,
+            auth()->user()->email,
+            $property->title,
+            [
+                'Type'     => $property->property_type ?? '—',
+                'City'     => $property->city ?? '—',
+                'Price'    => $property->price ?? '—',
+            ]
+        )
+    );
+} catch (\Exception $e) {}
+
+
+
+
+
+
+
+
+
+
     }
 
     public function update(Request $request, $id)
