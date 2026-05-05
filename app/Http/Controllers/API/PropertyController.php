@@ -599,6 +599,40 @@ class PropertyController extends Controller
             return $property->load(['features', 'amenities', 'images']);
         });
 
+
+
+
+
+
+
+
+
+
+// Admin ko email - nai property submit hui
+try {
+    \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))->send(
+        new \App\Mail\AdminSubmissionMail(
+            'property',
+            $user->name,
+            $user->email,
+            $property->title,
+            [
+                'Purpose' => $property->purpose ?? '—',
+                'Price'   => $property->price ?? '—',
+                'Status'  => 'Pending Approval',
+            ]
+        )
+    );
+} catch (\Exception $e) {}
+
+
+
+
+
+
+
+
+
         return response()->json([
             'status' => true,
             'message' => 'Property added successfully',

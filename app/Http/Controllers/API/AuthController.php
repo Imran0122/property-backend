@@ -44,6 +44,41 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+
+
+
+
+
+
+
+
+
+// Admin ko email - naya user/agent register hua
+try {
+    \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))->send(
+        new \App\Mail\AdminSubmissionMail(
+            $isAgent ? 'agent' : 'user',
+            $user->name,
+            $user->email,
+            $user->name,
+            [
+                'Phone' => $user->phone ?? '—',
+                'Role'  => $isAgent ? 'Agent' : 'User',
+            ]
+        )
+    );
+} catch (\Exception $e) {}
+
+
+
+
+
+
+
+
+
+
+
         return response()->json([
             'success' => true,
             'message' => $isAgent ? 'Agent registered successfully' : 'User registered successfully',
