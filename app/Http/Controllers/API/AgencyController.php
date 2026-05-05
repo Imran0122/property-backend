@@ -16,34 +16,34 @@ class AgencyController extends Controller
      * Return a list (slider) of agencies with basic info + a sample agent/user city
      */
     public function titaniumAgencies(Request $request)
-    {
-        $agencies = Agency::with(['agents.user'])
-            ->whereHas('agents')
-            ->latest()
-            ->take(12)
-            ->get()
-            ->map(function($agency) {
-                // get first agent user city name (if any)
-                $firstAgent = $agency->agents->first();
-                $city = null;
-                if ($firstAgent && $firstAgent->user && $firstAgent->user->city_id) {
-                    $city = optional($firstAgent->user->city)->name ?? null;
-                }
+{
+    $agencies = Agency::with(['agents.user'])
+        ->latest()
+        ->take(12)
+        ->get()
+        ->map(function($agency) {
+            $firstAgent = $agency->agents->first();
+            $city = null;
+            if ($firstAgent && $firstAgent->user && $firstAgent->user->city_id) {
+                $city = optional($firstAgent->user->city)->name ?? null;
+            }
+            return [
+                'id'          => $agency->id,
+                'name'        => $agency->name,
+                'slug'        => $agency->slug ?? (string) $agency->id,
+                'logo'        => $agency->logo ? asset('storage/' . $agency->logo) : null,
+                'phone'       => $agency->phone,
+                'email'       => $agency->email,
+                'address'     => $agency->address,
+                'description' => $agency->description,
+                'location'    => $city ?? $agency->city ?? '',
+                'sale'        => 0,
+                'rent'        => 0,
+            ];
+        });
 
-                return [
-                    'id' => $agency->id,
-                    'name' => $agency->name,
-                    'logo' => $agency->logo ? asset('storage/' . $agency->logo) : null,
-                    'phone' => $agency->phone,
-                    'email' => $agency->email,
-                    'address' => $agency->address,
-                    'description' => $agency->description,
-                    'city' => $city,
-                ];
-            });
-
-        return response()->json($agencies);
-    }
+    return response()->json(['data' => $agencies]);
+}
 
     /**
      * GET /api/agencies/{id}
