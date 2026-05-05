@@ -59,6 +59,7 @@ use App\Http\Controllers\API\Admin\AdminSocietyMapController;
 use App\Http\Controllers\API\Admin\AdminProjectController;
 use App\Http\Controllers\API\ContactInquiryController;
 use App\Http\Controllers\API\Admin\AdminAgencyController;
+use App\Http\Controllers\API\Admin\AdminBoutiqueController;
 // use App\Http\Controllers\API\ProjectController;
 // use App\Http\Controllers\API\LocationController;
 
@@ -502,4 +503,13 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('save-property', [SavedPropertyController::class, 'toggle']);
     Route::get('saved-properties', [SavedPropertyController::class, 'index']);
+});
+
+
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/boutique-orders', [AdminBoutiqueController::class, 'index']);
+    Route::get('/boutique-orders/{id}', [AdminBoutiqueController::class, 'show']);
+    Route::post('/boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve']);
+    Route::post('/boutique-orders/{id}/reject', [AdminBoutiqueController::class, 'reject']);
 });
