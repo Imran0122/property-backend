@@ -2,24 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class BoutiqueCartItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'boutique_product_id',
-        'property_id',
-        'quantity',
-        'unit_price',
-        'currency',
+        'user_id', 'boutique_product_id',
+        'quantity', 'unit_price', 'total_price', 'currency',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
+        'total_price' => 'decimal:2',
     ];
 
     public function user()

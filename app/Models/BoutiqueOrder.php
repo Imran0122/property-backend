@@ -10,15 +10,9 @@ class BoutiqueOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'order_number',
-        'subtotal',
-        'total',
-        'currency',
-        'status',
-        'payment_status',
-        'payment_method',
-        'notes',
+        'user_id', 'order_number', 'subtotal', 'total',
+        'currency', 'status', 'payment_status',
+        'payment_method', 'notes',
     ];
 
     protected $casts = [

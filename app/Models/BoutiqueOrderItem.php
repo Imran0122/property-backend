@@ -2,23 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class BoutiqueOrderItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'boutique_order_id',
-        'boutique_product_id',
-        'property_id',
-        'title',
-        'description',
-        'quantity',
-        'unit_price',
-        'total_price',
-        'currency',
+        'boutique_order_id', 'boutique_product_id',
+        'title', 'description', 'quantity',
+        'unit_price', 'total_price', 'currency',
+        'type', 'category',
     ];
 
     protected $casts = [
@@ -35,6 +30,7 @@ class BoutiqueOrderItem extends Model
     {
         return $this->belongsTo(BoutiqueProduct::class, 'boutique_product_id');
     }
+
 
     public function property()
     {
