@@ -286,11 +286,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
 });
 
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::post('/favorites', [FavoriteController::class, 'store']);
-//     Route::get('/favorites', [FavoriteController::class, 'index']);
-//     Route::delete('/favorites/{property_id}', [FavoriteController::class, 'destroy']);
-// });
+
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -485,14 +481,13 @@ Route::delete('agents/{id}', [AdminAgentController::class, 'destroy'])->whereNum
 // Order managemnet
 
 
-    Route::get('/boutique-orders', [AdminBoutiqueController::class, 'index']);
-    Route::get('/boutique-orders/{id}', [AdminBoutiqueController::class, 'show']);
-    Route::post('/boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve']);
-    Route::post('/boutique-orders/{id}/reject', [AdminBoutiqueController::class, 'reject']);
 
 
 
-
+Route::get('/boutique-orders', [AdminBoutiqueController::class, 'index']);
+Route::get('/boutique-orders/{id}', [AdminBoutiqueController::class, 'show'])->whereNumber('id');
+Route::post('/boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve'])->whereNumber('id');
+Route::post('/boutique-orders/{id}/reject', [AdminBoutiqueController::class, 'reject'])->whereNumber('id');
 
 
 });
