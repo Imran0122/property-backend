@@ -399,6 +399,27 @@ Route::post('articles/{id}/publish', [AdminArticleController::class, 'publish'])
 Route::post('articles/{id}/draft', [AdminArticleController::class, 'draft'])->whereNumber('id');
 
 
+
+
+
+
+
+
+
+// Agent dashboard — agency management
+Route::middleware('auth:sanctum')->prefix('agent')->group(function () {
+    Route::get('/agency', [AgencyController::class, 'myAgency']);
+    Route::post('/agency', [AgencyController::class, 'updateMyAgency']);
+    Route::get('/agency/staff', [AgencyController::class, 'myStaff']);
+    Route::post('/agents', [AgencyController::class, 'addStaff']);
+});
+
+
+
+
+
+
+
 // settings
   Route::get('/settings', [AdminSettingsController::class, 'index']);
     Route::put('/settings', [AdminSettingsController::class, 'update']);

@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use App\Models\Agency;
+use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -48,7 +49,24 @@ class AuthController extends Controller
 
 
 
+// Agency create karo agar agent hai
+if ($isAgent && !empty($request->agency_name)) {
+    $baseSlug = Str::slug($request->agency_name);
+    $slug = $baseSlug . '-' . $user->id;
 
+    $agency = Agency::create([
+        'user_id' => $user->id,
+        'name'    => $request->agency_name,
+        'email'   => $request->agency_email ?? $user->email,
+        'address' => $request->agency_address ?? '',
+        'phone'   => $user->phone ?? '',
+        'slug'    => $slug,
+        'status'  => 'pending',
+    ]);
+
+    // User ko agency se link karo
+    $user->update(['agency_id' => $agency->id]);
+}
 
 
 

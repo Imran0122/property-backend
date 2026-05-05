@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\Property;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 class AgencyController extends Controller
 {
     /**
@@ -87,4 +89,105 @@ class AgencyController extends Controller
             'data' => $agencies
         ]);
     }
+
+
+
+
+
+
+
+
+
+    // GET /api/agent/agency — logged-in agent ki agency fetch karo
+    public function myAgency()
+    {
+        $user = Auth::user();
+        $agency = Agency::where('user_id', $user->id)->first();
+
+        if (!$agency) {
+            return response()->json(['status' => false, 'message' => 'No agency found', 'data' => null]);
+        }
+
+        return response()->json(['status' => true, 'data' => $agency]);
+    }
+
+    // POST /api/agent/agency — agent ki agency update karo
+    public function updateMyAgency(Request $request)
+    {
+        $user = Auth::user();
+        $agency = Agency::where('user_id', $user->id)->first();
+
+        if (!$agency) {
+            $agency = Agency::create([
+                'user_id' => $user->id,
+                'slug'    => Str::slug($request->name ?? 'agency') . '-' . $user->id,
+                'status'  => 'pending',
+            ]);
+            $user->update(['agency_id' => $agency->id]);
+        }
+
+        $data = $request->only([
+            'name', 'email', 'address', 'city', 'phone',
+            'website', 'description',
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('agencies/logos', 'public');
+            $data['logo'] = $path;
+        }
+
+        $agency->update($data);
+
+        return response()->json(['status' => true, 'message' => 'Agency updated successfully', 'data' => $agency]);
+    }
+
+    // GET /api/agent/agency/staff — agency staff list
+    public function myStaff()
+    {
+        $user = Auth::user();
+        $agency = Agency::where('user_id', $user->id)->first();
+
+        if (!$agency) {
+            return response()->json(['status' => true, 'data' => []]);
+        }
+
+        $staff = \App\Models\User::where('agency_id', $agency->id)
+            ->where('id', '!=', $user->id)
+            ->get(['id', 'name', 'email', 'phone', 'role', 'status']);
+
+        return response()->json(['status' => true, 'data' => $staff]);
+    }
+
+    // POST /api/agent/agents — agency mein staff add karo
+    public function addStaff(Request $request)
+    {
+        $user = Auth::user();
+        $agency = Agency::where('user_id', $user->id)->first();
+
+        if (!$agency) {
+            return response()->json(['status' => false, 'message' => 'Agency not found'], 404);
+        }
+
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        $staffUser = \App\Models\User::create([
+            'name'       => $request->name,
+            'email'      => strtolower(trim($request->email)),
+            'phone'      => $request->phone ?? '',
+            'password'   => Hash::make(Str::random(12)),
+            'role'       => 'agent',
+            'is_agent'   => 1,
+            'status'     => 'active',
+            'agency_id'  => $agency->id,
+            'agency_name'=> $agency->name,
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Staff member added', 'data' => $staffUser]);
+    }
+
+
+
 }
