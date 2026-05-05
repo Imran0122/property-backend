@@ -479,6 +479,22 @@ Route::get('agents', [AdminAgentController::class, 'index']);
 Route::get('agents/{id}', [AdminAgentController::class, 'show'])->whereNumber('id');
 Route::delete('agents/{id}', [AdminAgentController::class, 'destroy'])->whereNumber('id');
 
+
+
+
+// Order managemnet
+
+
+    Route::get('/boutique-orders', [AdminBoutiqueController::class, 'index']);
+    Route::get('/boutique-orders/{id}', [AdminBoutiqueController::class, 'show']);
+    Route::post('/boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve']);
+    Route::post('/boutique-orders/{id}/reject', [AdminBoutiqueController::class, 'reject']);
+
+
+
+
+
+
 });
 
 
@@ -507,9 +523,3 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/boutique-orders', [AdminBoutiqueController::class, 'index']);
-    Route::get('/boutique-orders/{id}', [AdminBoutiqueController::class, 'show']);
-    Route::post('/boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve']);
-    Route::post('/boutique-orders/{id}/reject', [AdminBoutiqueController::class, 'reject']);
-});
