@@ -53,7 +53,7 @@ class AuthController extends Controller
 
 
 
-// Admin ko email - naya user/agent register hua
+
 try {
     \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))->send(
         new \App\Mail\AdminSubmissionMail(
