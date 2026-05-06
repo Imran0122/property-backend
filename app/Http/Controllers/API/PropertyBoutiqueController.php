@@ -13,27 +13,54 @@ use Illuminate\Support\Str;
 
 class PropertyBoutiqueController extends Controller
 {
-    // GET /api/property-boutique/products
     public function products(Request $request)
-    {
-        $announcements = BoutiqueProduct::where('status', 'active')
-            ->where('category', 'announcements')
-            ->orderBy('sort_order')
-            ->get();
+{
+    $announcements = BoutiqueProduct::where('is_active', 1)
+        ->where('category', 'announcements')
+        ->orderBy('sort_order')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id'                  => $item->id,
+                'name'                => $item->name,
+                'description'         => $item->description,
+                'price'               => $item->price,
+                'currency'            => $item->currency ?? 'MAD',
+                'type'                => $item->type,
+                'category'            => $item->category,
+                'is_recommended'      => $item->is_recommended ?? false,
+                'requires_property'   => in_array(strtolower($item->type ?? ''), ['hot-ad', 'super-hot-ad']),
+                'sort_order'          => $item->sort_order,
+            ];
+        });
 
-        $credits = BoutiqueProduct::where('status', 'active')
-            ->where('category', 'credits')
-            ->orderBy('sort_order')
-            ->get();
+    $credits = BoutiqueProduct::where('is_active', 1)
+        ->where('category', 'credits')
+        ->orderBy('sort_order')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id'                  => $item->id,
+                'name'                => $item->name,
+                'description'         => $item->description,
+                'price'               => $item->price,
+                'currency'            => $item->currency ?? 'MAD',
+                'type'                => $item->type,
+                'category'            => $item->category,
+                'is_recommended'      => $item->is_recommended ?? false,
+                'requires_property'   => false,
+                'sort_order'          => $item->sort_order,
+            ];
+        });
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'announcements' => $announcements,
-                'credits' => $credits,
-            ],
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'announcements' => $announcements->values(),
+            'credits'       => $credits->values(),
+        ],
+    ]);
+}
 
     // GET /api/property-boutique/cart
     public function cart(Request $request)

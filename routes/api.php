@@ -263,17 +263,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages/conversation/{otherUserId}/{propertyId?}', [MessageController::class, 'conversation']);
     Route::post('/messages/{id}/read', [MessageController::class, 'markAsRead']);
     Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
-    // Wallet
-    Route::get('/wallet', [WalletController::class, 'index']);
-
-    // Auto Utilization
-    Route::prefix('auto-utilization')->group(function () {
-        Route::get('/',              [AutoUtilizationController::class, 'index']);
-        Route::post('/apply',        [AutoUtilizationController::class, 'apply']);
-        Route::delete('/{category}', [AutoUtilizationController::class, 'remove']);
-    });
-
-
 });
 
 // });
@@ -527,22 +516,52 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('save-property', [SavedPropertyController::class, 'toggle']);
     Route::get('saved-properties', [SavedPropertyController::class, 'index']);
-});
-
-
-
-// Wallet
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/wallet', [WalletController::class, 'index']);
-    Route::get('/wallet/orders', [WalletController::class, 'orders']);
-});
 
 
 
 
+// ─── Wallet ───────────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->get('/wallet', [WalletController::class, 'index']);
 
+// ─── Auto Utilization ─────────────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->prefix('auto-utilization')->group(function () {
-    Route::get('/',             [AutoUtilizationController::class, 'index']);
-    Route::post('/apply',       [AutoUtilizationController::class, 'apply']);
-    Route::delete('/{category}',[AutoUtilizationController::class, 'remove']);
+    Route::get('/',              [AutoUtilizationController::class, 'index']);
+    Route::post('/apply',        [AutoUtilizationController::class, 'apply']);
+    Route::delete('/{category}', [AutoUtilizationController::class, 'remove']);
 });
+
+// ─── Admin Boutique Orders ────────────────────────────────────────────────────
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+    Route::get('/boutique-orders',                    [AdminBoutiqueController::class, 'index']);
+    Route::get('/boutique-orders/{id}',               [AdminBoutiqueController::class, 'show']);
+    Route::post('/boutique-orders/{id}/approve',      [AdminBoutiqueController::class, 'approve']);
+    Route::post('/boutique-orders/{id}/reject',       [AdminBoutiqueController::class, 'reject']);
+});
+
+});
+
+
+
+// // Wallet
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/wallet', [WalletController::class, 'index']);
+//     Route::get('/wallet/orders', [WalletController::class, 'orders']);
+// });
+
+
+
+
+
+// Route::middleware('auth:sanctum')->prefix('auto-utilization')->group(function () {
+//     Route::get('/',             [AutoUtilizationController::class, 'index']);
+//     Route::post('/apply',       [AutoUtilizationController::class, 'apply']);
+//     Route::delete('/{category}',[AutoUtilizationController::class, 'remove']);
+// });
+
+
+
+
+
+
+
+
