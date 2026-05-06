@@ -263,6 +263,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages/conversation/{otherUserId}/{propertyId?}', [MessageController::class, 'conversation']);
     Route::post('/messages/{id}/read', [MessageController::class, 'markAsRead']);
     Route::get('/messages/unread-count', [MessageController::class, 'unreadCount']);
+    // Wallet
+    Route::get('/wallet', [WalletController::class, 'index']);
+
+    // Auto Utilization
+    Route::prefix('auto-utilization')->group(function () {
+        Route::get('/',              [AutoUtilizationController::class, 'index']);
+        Route::post('/apply',        [AutoUtilizationController::class, 'apply']);
+        Route::delete('/{category}', [AutoUtilizationController::class, 'remove']);
+    });
+
+
 });
 
 // });
