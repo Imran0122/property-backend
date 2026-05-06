@@ -60,6 +60,8 @@ use App\Http\Controllers\API\Admin\AdminProjectController;
 use App\Http\Controllers\API\ContactInquiryController;
 use App\Http\Controllers\API\Admin\AdminAgencyController;
 use App\Http\Controllers\API\Admin\AdminBoutiqueController;
+use App\Http\Controllers\API\WalletController;
+use App\Http\Controllers\API\AutoUtilizationController;
 // use App\Http\Controllers\API\ProjectController;
 // use App\Http\Controllers\API\LocationController;
 
@@ -518,3 +520,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+// Wallet
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/wallet', [WalletController::class, 'index']);
+    Route::get('/wallet/orders', [WalletController::class, 'orders']);
+});
+
+
+
+
+
+Route::middleware('auth:sanctum')->prefix('auto-utilization')->group(function () {
+    Route::get('/',             [AutoUtilizationController::class, 'index']);
+    Route::post('/apply',       [AutoUtilizationController::class, 'apply']);
+    Route::delete('/{category}',[AutoUtilizationController::class, 'remove']);
+});
