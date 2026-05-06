@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\UserCredit;
-use App\Models\BoutiqueOrder;
+use Illuminate\Http\Request;
 
 class WalletController extends Controller
 {
-    // GET /api/wallet
     public function index(Request $request)
     {
         $user    = $request->user();
@@ -18,12 +16,13 @@ class WalletController extends Controller
         return response()->json([
             'success' => true,
             'data'    => [
-                'refresh_credits'   => $credits->refresh_credits,
-                'hot_credits'       => $credits->hot_credits,
-                'super_hot_credits' => $credits->super_hot_credits,
-                'story_credits'     => $credits->story_credits,
-                'photo_credits'     => $credits->photo_credits,
-                'video_credits'     => $credits->video_credits,
+                'announcement_credits' => $credits->announcement_credits ?? 0,
+                'refresh_credits'      => $credits->refresh_credits ?? 0,
+                'hot_credits'          => $credits->hot_credits ?? 0,
+                'super_hot_credits'    => $credits->super_hot_credits ?? 0,
+                'story_credits'        => $credits->story_credits ?? 0,
+                'photo_credits'        => $credits->photo_credits ?? 0,
+                'video_credits'        => $credits->video_credits ?? 0,
             ],
         ]);
     }

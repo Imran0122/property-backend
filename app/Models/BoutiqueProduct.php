@@ -10,17 +10,23 @@ class BoutiqueProduct extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'description', 'price', 'currency',
-        'type', 'category', 'badge', 'is_recommended',
-        'requires_property', 'requires_published_property',
-        'status', 'sort_order',
+        'name',
+        'description',
+        'price',
+        'currency',
+        'category',
+        'type',
+        'icon',
+        'badge',
+        'is_active',
+        'is_recommended',
+        'sort_order',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
+        'price'          => 'decimal:2',
+        'is_active'      => 'boolean',
         'is_recommended' => 'boolean',
-        'requires_property' => 'boolean',
-        'requires_published_property' => 'boolean',
     ];
 
     public function cartItems()

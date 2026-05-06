@@ -331,6 +331,15 @@ Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function (
 });
 
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/wallet',                         [WalletController::class, 'index']);
+    Route::get('/auto-utilization',               [AutoUtilizationController::class, 'index']);
+    Route::post('/auto-utilization/apply',        [AutoUtilizationController::class, 'apply']);
+    Route::delete('/auto-utilization/{category}', [AutoUtilizationController::class, 'remove']);
+});
+
+
+
 Route::prefix('home-loan')->group(function () {
     Route::get('/meta', [HomeLoanController::class, 'meta']);
     Route::get('/calculate', [HomeLoanController::class, 'calculate']);
@@ -351,7 +360,11 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
 
     // Dashboard
     Route::get('dashboard/stats', [AdminDashboardController::class, 'stats']);
-
+    // Boutique Orders
+    Route::get('boutique-orders',               [AdminBoutiqueController::class, 'index']);
+    Route::get('boutique-orders/{id}',          [AdminBoutiqueController::class, 'show']);
+    Route::post('boutique-orders/{id}/approve', [AdminBoutiqueController::class, 'approve']);
+    Route::post('boutique-orders/{id}/reject',  [AdminBoutiqueController::class, 'reject']);
     // Property moderation
     // IMPORTANT: special routes pehle, {id} baad me
     Route::get('properties/recent', [RecentPropertiesController::class, 'index']);
