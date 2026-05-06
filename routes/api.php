@@ -520,6 +520,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+
+
+});
+
+
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->get('/wallet', [WalletController::class, 'index']);
 
@@ -537,27 +542,6 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::post('/boutique-orders/{id}/approve',      [AdminBoutiqueController::class, 'approve']);
     Route::post('/boutique-orders/{id}/reject',       [AdminBoutiqueController::class, 'reject']);
 });
-
-});
-
-
-
-// // Wallet
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::get('/wallet', [WalletController::class, 'index']);
-//     Route::get('/wallet/orders', [WalletController::class, 'orders']);
-// });
-
-
-
-
-
-// Route::middleware('auth:sanctum')->prefix('auto-utilization')->group(function () {
-//     Route::get('/',             [AutoUtilizationController::class, 'index']);
-//     Route::post('/apply',       [AutoUtilizationController::class, 'apply']);
-//     Route::delete('/{category}',[AutoUtilizationController::class, 'remove']);
-// });
-
 
 
 
