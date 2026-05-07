@@ -3,21 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BoutiqueOrder extends Model
 {
-    use HasFactory;
+    protected $table = 'boutique_orders';
 
     protected $fillable = [
-        'user_id', 'order_number', 'subtotal', 'total',
-        'currency', 'status', 'payment_status',
-        'payment_method', 'notes',
-    ];
-
-    protected $casts = [
-        'subtotal' => 'decimal:2',
-        'total' => 'decimal:2',
+        'user_id',
+        'order_number',
+        'total',
+        'currency',
+        'payment_method',
+        'payment_proof',
+        'status',
+        'payment_status',
+        'notes',
     ];
 
     public function user()

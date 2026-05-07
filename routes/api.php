@@ -331,12 +331,12 @@ Route::middleware('auth:sanctum')->prefix('property-boutique')->group(function (
 });
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/wallet',                         [WalletController::class, 'index']);
-    Route::get('/auto-utilization',               [AutoUtilizationController::class, 'index']);
-    Route::post('/auto-utilization/apply',        [AutoUtilizationController::class, 'apply']);
-    Route::delete('/auto-utilization/{category}', [AutoUtilizationController::class, 'remove']);
-});
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/wallet',                         [WalletController::class, 'index']);
+//     Route::get('/auto-utilization',               [AutoUtilizationController::class, 'index']);
+//     Route::post('/auto-utilization/apply',        [AutoUtilizationController::class, 'apply']);
+//     Route::delete('/auto-utilization/{category}', [AutoUtilizationController::class, 'remove']);
+// });
 
 
 
